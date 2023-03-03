@@ -1,16 +1,21 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <vector>
 #include <algorithm>
 #include <string>
 #include <list>
+#include <vector>
 
 using namespace std;
 
-void read_file(int k, string fileName);
+void first_read(string fileName);
+void cpm(int k);
 double calculatePrediction();
 void printMap(map<string, list<int>> map);
+void printAlphabet(map<char, int> map);
+
+vector<int> arr_file;
+map<char, int> alphabet;
 
 int main(int argc, char** argv) {
 
@@ -22,41 +27,60 @@ int main(int argc, char** argv) {
     int k = stoi(argv[1]);
     string fileName = argv[2];
 
-    read_file(k, fileName);
+    first_read(fileName);
+
+    cpm(k);
 
     return 0;
 }
 
-
-void read_file(int k, string fileName) {
+void first_read(string fileName) {
 
     ifstream file(fileName);
 
+    char c = file.get();
+    
+
+    while (!file.eof()) {
+
+        arr_file.push_back(c);
+
+        alphabet.insert({c, 0});
+        alphabet[c]++;
+
+        c = file.get();
+    }
+
+    file.close();
+}
+
+
+void cpm(int k) {
+
     char c;
 
-    map<string, list<int>> map; // map dos padroes, lista das posições onde forem encontradas
+    map<string, list<int>> pointer_map; // map dos padroes, lista das posições onde forem encontradas
 
     string pattern = "";
 
-    int filePos = 1;
-    while (!file.eof())
+    for (int pos = 0; pos < arr_file.size(); pos++)
     {
 
-        c = file.get();//le o caracter
+        c = arr_file[pos];//le o caracter
 
         pattern += c; // adiciona o caracter ao padrao
 
         if (pattern.size() >= k) {
 
-            if (map.count(pattern) == 0) { //padrao nao esta no map
+            if (pointer_map.count(pattern) == 0) { //padrao nao esta no map
 
                 list<int> tmp; //! maybe usar arraylist, fica + facil
-                tmp.push_back(filePos);
-                map.insert({pattern, tmp}); // insere o padrao no map com a posição atual
+                tmp.push_back(pos);
+                pointer_map.insert({pattern , tmp}); // insere o padrao no map com a posição atual
 
             } else { //padrao ja esta no map
 
-                map[pattern].push_back(filePos); // adiciona a posição atual ao padrao
+                pointer_map[pattern].push_back(pos); // adiciona a posição atual ao padrao
 
             }
 
@@ -64,23 +88,27 @@ void read_file(int k, string fileName) {
 
         }
 
-
-        filePos++;
     }
-    
-    file.close();
 
-    printMap(map);
+    //printMap(map);
+    printAlphabet(alphabet);
 }
 
-double calculatePrediction(){
+double calculatePrediction() {
 
     return 0;
 }
 
-void printMap(map<string, list<int>> map) {
+void printAlphabet(map<char, int> pointer_map) {
 
-    for (auto it = map.begin(); it != map.end(); it++) {
+    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
+        cout << it->first << " : " << it->second << endl;
+    }
+}
+
+void printMap(map<string, list<int>> pointer_map) {
+
+    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
         cout << it->first << " : ";
         for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
             cout << *it2 << " ";
