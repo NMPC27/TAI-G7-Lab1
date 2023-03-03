@@ -5,19 +5,19 @@
 Tasks within each category are ordered in terms of urgency of development (simpler approaches first).
 
 - Assign different distributions to the symbols other than the one being predicted:
-  - Uniform distribution
+  **- Uniform distribution**
   - Distribution using static probabilities of each symbol (probability of symbol appearing in the _whole_ file)
 - Use different thresholds for changing the copy pointer:
-  - Static value (probability of hit being lower than a value)
+  **- Static value (probability of hit being lower than a value)**
   - Given number of successive fails
   - Rate of change of the probability of hit
 - Choice of next pointer when copy pointer is changed:
-  - Next pointer closest to the changed copy pointer
+  **- Next pointer closest to the changed copy pointer**
   - Most recent
 - Data structures:
   - Circular array for the copy context (no append(end) -> remove(first) needed)
 - File reading strategy:
-  - Keep file contents in memory
+  **- Keep file contents in memory**
   - Read file in binary
 - Possible bugs:
   - Not working with UTF-8
