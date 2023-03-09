@@ -7,13 +7,13 @@
 #include <vector>
 #include <cmath>
 #include "unistd.h"
-#include "cpm.h"
+#include "parser.hpp"
+#include "copy_model.hpp"
+#include "cpm.hpp"
 
 using namespace std;
 
 vector<int> arr_file;
-map<char, int> alphabet;
-int count_alphabet = 0;
 map<char, double> base_distribution;
 
 
@@ -93,52 +93,36 @@ int main(int argc, char** argv) {
         }
     }
 
+    // TODO: obtain from passed arguments
+    ReadingStrategy reading_strategy;
+    CopyPointerThreshold pointer_threshold;
+    CopyPointerManager pointer_manager;
+
+    CopyModel model = CopyModel(alpha, &reading_strategy, &pointer_threshold, &pointer_manager);
+
     string fileName = string(argv[optind]);
+    model.firstPass(fileName);
 
-    firstPass(fileName);
+    while (!model.eof()) {
+        model.predictNext();
 
-    cpm(k, alpha);
+        outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+    }
 
     return 0;
 }
-
-void firstPass(string fileName) {
-
-    ifstream file(fileName);
-
-    char c = file.get();
-    
-    while (!file.eof()) {
-        count_alphabet++;
-
-        arr_file.push_back((int) c);
-
-        alphabet.insert({c, 0});
-        alphabet[c]++;
-
-        c = file.get();
-    }
-
-    file.close();
-}
-
-struct PatternInfo {
-    vector<size_t> pointers;
-    int copy_pointer_index;     // Pattern's last symbol
-    int hits;
-    int misses;
-};
 
 void cpm(int k, double alpha) {
 
     char c;
 
-    map<string, PatternInfo> pointer_map; // map dos padroes, lista das posições onde forem encontradas
+    map<string, PatternInfo> pointer_map;
 
     string pattern = "";
 
     // Base distribution depends on the symbol's relative frequencies
-    for (auto pair : alphabet) {
+    for (auto pair : alphabet_count)
+    {
         base_distribution[pair.first] = (double) pair.second / count_alphabet;
     }
     
@@ -152,81 +136,46 @@ void cpm(int k, double alpha) {
     
     double information_sum;
 
+    CopyModel model;
+
     for (size_t pos = k-1; pos < arr_file.size(); pos++)
     {
-        c = arr_file[pos];//le o caracter
+        c = arr_file[pos];
 
-        pattern += c; // adiciona o caracter ao padrao
+        pattern += c;
 
-        if (pointer_map.count(pattern) == 0) { //padrao nao esta no map
+        if (pointer_map.count(pattern) == 0) {
 
             struct PatternInfo pattern_info = {
-                {pos}, 0, 0, 0
+                .pointers = {pos},
+                .copy_pointer_index = 0,
+                .hits = 0,
+                .misses = 0
             };
 
-            pointer_map.insert({pattern, pattern_info}); // insere o padrao no map com a posição atual
+            pointer_map.insert({pattern, pattern_info});
 
-        } else { //padrao ja esta no map
+        } else {
 
-            pointer_map[pattern].pointers.push_back(pos);// adiciona a posição atual ao padrao
+            pointer_map[pattern].pointers.push_back(pos);
 
-            // Predict
-            int predict_index = pointer_map[pattern].pointers[pointer_map[pattern].copy_pointer_index] + 1;
-
-            // caracteres: previsão e o verdadeiro
-            int prediction = arr_file[predict_index];
-            int actual = arr_file[pos + 1];
-
-            if (prediction == actual) {
-                pointer_map[pattern].hits++;
-
-                printf("Hit: %s, Prediction: %c\n", pattern.c_str(), prediction);
-            } else {
-                pointer_map[pattern].misses++;
-
-                printf("Miss: %s, Prediction: %c, Actual: %c\n", pattern.c_str(), prediction, actual);
-            }
-
-            double hit_probability = calculateProbability(pointer_map[pattern].hits, pointer_map[pattern].misses, alpha);
-            
-            //! Calculate information of current character  ???
-            information_sum += -log2((prediction == actual) ? hit_probability : ((1 - hit_probability) / (alphabet.size() - 1)));
-
-            // Check whether copy pointer should be changed
-            if (hit_probability < 0.5) {
-                pointer_map[pattern].copy_pointer_index++;
-
-                pointer_map[pattern].hits = 0;
-                pointer_map[pattern].misses = 0;
-
-                printf("Hit probability below threshold, choosing copy pointer %d\n", pointer_map[pattern].copy_pointer_index);
-            }
+            model.predictNext()
 
         }
 
 
-        pattern.erase(0, 1); // remove o primeiro caracter do padrao
+        pattern.erase(0, 1);
 
     }
 
-    cout << "Amount of information: " << information_sum << endl;
-
-    //printMap(map);
-    //printAlphabet(alphabet);
 }
 
 double calculateProbability(int hits, int misses, double alpha) {
     return (hits + alpha) / (hits + misses + 2 * alpha);
 }
 
-void printAlphabet(map<char, double> pointer_map) {
-
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : " << it->second << endl;
-    }
-}
-
-void outputProbabilityDistribution(double hit_probability) {
+// TODO: What should the model provide?
+void outputProbabilityDistribution(char prediction, double hit_probability, map<char, double> base_distribution) {
 
 }
 
@@ -250,6 +199,13 @@ void printOptions() {
     cout << "\t\t\t\tn:X - static probability below X" << endl;
     cout << "\t\t\t\tf:X - number of successive fails above X" << endl; //! temos de ver que o numero faz sentido
     cout << "\t\t\t\tc:X - absolute value of the negative derivative of the prediction probability above X" << endl;
+}
+
+void printAlphabet(map<char, double> pointer_map) {
+
+    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
+        cout << it->first << " : " << it->second << endl;
+    }
 }
 
 void printMap(map<string, list<int>> pointer_map) {
