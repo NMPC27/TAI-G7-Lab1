@@ -13,15 +13,17 @@
 
 using namespace std;
 
-vector<int> arr_file;
-map<char, double> base_distribution;
-
 
 int main(int argc, char** argv) {
 
     int c;
     int k = 4;
     double alpha = 0.1;
+    ReadingStrategy* reading_strategy;
+    CopyPointerThreshold* pointer_threshold;
+    CopyPointerManager* pointer_manager;
+    BaseDistribution* base_distribution;
+
     while ((c = getopt(argc, argv, "hbk:a:p:r:t:")) != -1){
         switch(c){
             case 'h':
@@ -94,17 +96,23 @@ int main(int argc, char** argv) {
     }
 
     // TODO: obtain from passed arguments
-    ReadingStrategy reading_strategy;
-    CopyPointerThreshold pointer_threshold;
-    CopyPointerManager pointer_manager;
+    reading_strategy = &InMemoryReadingStrategy();
+    StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold();
+    pointer_threshold = &scpt;
+    RecentCopyPointerManager rcpm = RecentCopyPointerManager();
+    pointer_manager = &rcpm;
+    base_distribution = &UniformDistribution();
 
-    CopyModel model = CopyModel(alpha, &reading_strategy, &pointer_threshold, &pointer_manager);
+    CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
 
     string fileName = string(argv[optind]);
     model.firstPass(fileName);
 
+    model.initializeWithMostFrequent();
     while (!model.eof()) {
-        model.predictNext();
+        
+        if (model.advance())
+            model.predict();
 
         outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
     }
@@ -112,71 +120,13 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void cpm(int k, double alpha) {
-
-    char c;
-
-    map<string, PatternInfo> pointer_map;
-
-    string pattern = "";
-
-    // Base distribution depends on the symbol's relative frequencies
-    for (auto pair : alphabet_count)
-    {
-        base_distribution[pair.first] = (double) pair.second / count_alphabet;
-    }
-    
-    printAlphabet(base_distribution);
-
-    // Handle the first k-1 symbols
-    for (int i = 0; i < k-1; i++)
-    {
-        pattern += arr_file[i];
-    }
-    
-    double information_sum;
-
-    CopyModel model;
-
-    for (size_t pos = k-1; pos < arr_file.size(); pos++)
-    {
-        c = arr_file[pos];
-
-        pattern += c;
-
-        if (pointer_map.count(pattern) == 0) {
-
-            struct PatternInfo pattern_info = {
-                .pointers = {pos},
-                .copy_pointer_index = 0,
-                .hits = 0,
-                .misses = 0
-            };
-
-            pointer_map.insert({pattern, pattern_info});
-
-        } else {
-
-            pointer_map[pattern].pointers.push_back(pos);
-
-            model.predictNext()
-
-        }
-
-
-        pattern.erase(0, 1);
-
-    }
-
-}
-
-double calculateProbability(int hits, int misses, double alpha) {
-    return (hits + alpha) / (hits + misses + 2 * alpha);
-}
-
-// TODO: What should the model provide?
+// TODO: What should the model provide, and how?
 void outputProbabilityDistribution(char prediction, double hit_probability, map<char, double> base_distribution) {
-
+    cout << "Prediction: '" << prediction << "', " << hit_probability << " | Distribution: ";
+    for (auto pair : base_distribution) {
+        cout << "('" << pair.first << "', " << pair.second << ") ";
+    }
+    cout << endl;
 }
 
 void printUsage(char* prog_name) {

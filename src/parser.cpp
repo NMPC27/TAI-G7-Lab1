@@ -4,7 +4,7 @@ void InMemoryReadingStrategy::read(char c) {
     this->mem_file.push_back(c);
 }
 
-char InMemoryReadingStrategy::at(int pos) {
+char InMemoryReadingStrategy::at(size_t pos) {
     return this->mem_file[pos];
 }
 

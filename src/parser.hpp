@@ -16,7 +16,7 @@ class InMemoryReadingStrategy : public ReadingStrategy {
 public:
     InMemoryReadingStrategy();
     void read(char);
-    char at(int);
+    char at(size_t);
     size_t end_of_stream();
     void clean();
 

@@ -4,10 +4,6 @@
 #include <map>
 
 
-void firstPass(std::string fileName);
-void cpm(int k, double alpha);
-double calculateProbability(int hits, int misses, double alpha);
-
 // Options
 void printUsage(char* prog_name);
 void printOptions();
