@@ -12,7 +12,7 @@ struct PatternInfo {
 
 class CopyPointerThreshold {
 public:
-    virtual bool surpassedThreshold(double hit_probability);
+    virtual bool surpassedThreshold(double hit_probability) = 0;
 };
 
 class StaticCopyPointerThreshold : public CopyPointerThreshold {
@@ -22,7 +22,7 @@ public:
 
 class CopyPointerManager {
 public:
-    virtual int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+    virtual int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) = 0;
 };
 
 class RecentCopyPointerManager : public CopyPointerManager {
@@ -32,7 +32,7 @@ public:
 
 class BaseDistribution {
 public:
-    virtual void setBaseDistribution(std::map<char, int> histogram);
+    virtual void setBaseDistribution(std::map<char, int> histogram) = 0;
     std::map<char, double> distribution;
 };
 
@@ -58,7 +58,7 @@ class CopyModel {
     std::map<char, int> alphabet_counts;
     std::map<std::string, PatternInfo> pointer_map;
     
-    size_t current_position;
+    size_t current_position = 0;
     std::string current_pattern;
 
 public:
@@ -73,8 +73,8 @@ public:
 
     // Read-only values. Always overwritten when calling predictNext()
     std::map<char, double> probability_distribution;
-    double hit_probability;
-    char prediction;
+    double hit_probability = 0;
+    char prediction = '\0';
 
 private:
     double calculateProbability();

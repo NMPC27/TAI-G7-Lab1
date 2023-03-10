@@ -15,7 +15,7 @@ void UniformDistribution::setBaseDistribution(std::map<char, int> histogram) {
     distribution.clear();
 
     for (auto pair : histogram)
-        distribution[pair.first] = 1 / histogram.size();
+        distribution[pair.first] = 1.0 / histogram.size();
 }
 
 void FrequencyDistribution::setBaseDistribution(std::map<char, int> histogram){
@@ -26,7 +26,7 @@ void FrequencyDistribution::setBaseDistribution(std::map<char, int> histogram){
         total += pair.second;
 
     for (auto pair : histogram)
-        distribution[pair.first] = pair.second / total;
+        distribution[pair.first] = (double) pair.second / total;
 }
 
 void CopyModel::initializeWithMostFrequent() {
@@ -34,17 +34,17 @@ void CopyModel::initializeWithMostFrequent() {
             [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
     );
 
-    current_pattern = std::string(k-1, max_pair->first);
+    current_pattern = std::string(k, max_pair->first);
 }
 
 bool CopyModel::advance() {
-    current_pattern += reading_strategy->at(current_position);
+    current_pattern += reading_strategy->at(current_position++);
     current_pattern.erase(0, 1);
 
     if (pointer_map.count(current_pattern) == 0) {
 
         struct PatternInfo pattern_info = {
-            .pointers = {current_position},
+            .pointers = {current_position - 1},
             .copy_pointer_index = 0,
             .hits = 0,
             .misses = 0
@@ -109,6 +109,7 @@ void CopyModel::firstPass(std::string file_name) {
     file.close();
 
     base_distribution->setBaseDistribution(alphabet_counts);
+    probability_distribution = std::map<char, double>(base_distribution->distribution);
 }
 
 bool CopyModel::eof() {
@@ -128,7 +129,12 @@ double CopyModel::calculateProbability() {
 }
 
 void CopyModel::setRemainderProbabilities(char exception, double probability_to_distribute) {
-    for (auto& pair : probability_distribution)
+    double base_remainder_total = 0.0;
+    for (auto pair : base_distribution->distribution)
         if (pair.first != exception)
-            pair.second = base_distribution->distribution[pair.first];
+            base_remainder_total += pair.second;
+    
+    for (auto pair : base_distribution->distribution)
+        if (pair.first != exception)
+            probability_distribution[pair.first] = probability_to_distribute * base_distribution->distribution[pair.first] / base_remainder_total;
 }

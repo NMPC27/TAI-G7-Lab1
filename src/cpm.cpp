@@ -7,7 +7,6 @@
 #include <vector>
 #include <cmath>
 #include "unistd.h"
-#include "parser.hpp"
 #include "copy_model.hpp"
 #include "cpm.hpp"
 
@@ -95,13 +94,20 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (optind == argc) {
+        cout << "Error: no file was specified!" << endl;
+        return 1;
+    }
+
     // TODO: obtain from passed arguments
-    reading_strategy = &InMemoryReadingStrategy();
+    InMemoryReadingStrategy imrs = InMemoryReadingStrategy();
     StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold();
-    pointer_threshold = &scpt;
     RecentCopyPointerManager rcpm = RecentCopyPointerManager();
+    UniformDistribution ud = UniformDistribution();
+    reading_strategy = &imrs;
+    pointer_threshold = &scpt;
     pointer_manager = &rcpm;
-    base_distribution = &UniformDistribution();
+    base_distribution = &ud;
 
     CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
 
@@ -110,11 +116,10 @@ int main(int argc, char** argv) {
 
     model.initializeWithMostFrequent();
     while (!model.eof()) {
-        
-        if (model.advance())
+        if (model.advance()) {
             model.predict();
-
-        outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+            outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+        }
     }
 
     return 0;
