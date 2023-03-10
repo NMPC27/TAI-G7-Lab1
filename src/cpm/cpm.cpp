@@ -131,7 +131,8 @@ void CopyModel::firstPass(std::string file_name) {
 }
 
 bool CopyModel::eof() {
-    return current_position >= reading_strategy->endOfStream();
+    // We add one because we don't want to predict a character outside of the stream, so we end earlier
+    return current_position + 1 >= reading_strategy->endOfStream();
 }
 
 void CopyModel::reset() {
