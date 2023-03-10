@@ -8,7 +8,7 @@ char InMemoryReadingStrategy::at(size_t pos) {
     return this->mem_file[pos];
 }
 
-size_t InMemoryReadingStrategy::end_of_stream() {
+size_t InMemoryReadingStrategy::endOfStream() {
     return this->mem_file.size();
 }
 

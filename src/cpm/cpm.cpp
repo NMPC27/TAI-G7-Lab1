@@ -115,7 +115,7 @@ void CopyModel::firstPass(std::string file_name) {
 }
 
 bool CopyModel::eof() {
-    return current_position >= reading_strategy->end_of_stream();
+    return current_position >= reading_strategy->endOfStream();
 }
 
 void CopyModel::reset() {

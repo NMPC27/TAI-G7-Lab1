@@ -5,7 +5,7 @@ class ReadingStrategy {
 public:
     virtual void read(char) = 0;
     virtual char at(size_t) = 0;
-    virtual size_t end_of_stream() = 0;
+    virtual size_t endOfStream() = 0;
 
 };
 
@@ -16,7 +16,7 @@ class InMemoryReadingStrategy : public ReadingStrategy {
 public:
     void read(char);
     char at(size_t);
-    size_t end_of_stream();
+    size_t endOfStream();
     void clean();
 
 };
