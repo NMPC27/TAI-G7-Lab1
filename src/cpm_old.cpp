@@ -1,35 +1,10 @@
 #include <fstream>
 #include <algorithm>
 #include "cpm.hpp"
+#include "cpm_old.hpp"
 
 
-bool StaticCopyPointerThreshold::surpassedThreshold(double hit_probability) {
-    return hit_probability < 0.5;
-}
-
-int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
-    return current_copy_pointer + 1;
-}
-
-void UniformDistribution::setBaseDistribution(std::map<char, int> histogram) {
-    distribution.clear();
-
-    for (auto pair : histogram)
-        distribution[pair.first] = 1.0 / histogram.size();
-}
-
-void FrequencyDistribution::setBaseDistribution(std::map<char, int> histogram){
-    distribution.clear();
-
-    int total = 0;
-    for (auto pair : histogram)
-        total += pair.second;
-
-    for (auto pair : histogram)
-        distribution[pair.first] = (double) pair.second / total;
-}
-
-void CopyModel::initializeWithMostFrequent() {
+void CopyModelOld::initializeWithMostFrequent() {
     auto max_pair = std::max_element(alphabet_counts.begin(), alphabet_counts.end(),
             [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
     );
@@ -38,7 +13,7 @@ void CopyModel::initializeWithMostFrequent() {
     current_pattern += reading_strategy->at(current_position);
 }
 
-void CopyModel::registerPattern() {
+void CopyModelOld::registerPattern() {
     if (pointer_map.count(current_pattern) == 0) {
 
         struct PatternInfo pattern_info = {
@@ -56,13 +31,12 @@ void CopyModel::registerPattern() {
     }
 }
 
-void CopyModel::advance() {
+void CopyModelOld::advance() {
     current_pattern += reading_strategy->at(current_position++);
     current_pattern.erase(0, 1);
-    
 }
 
-bool CopyModel::predict() {
+bool CopyModelOld::predict() {
     int predict_index = pointer_map[current_pattern].pointers[ pointer_map[current_pattern].copy_pointer_index ] + 1;
 
     prediction = reading_strategy->at(predict_index);
@@ -93,7 +67,7 @@ bool CopyModel::predict() {
     return hit;
 }
 
-void CopyModel::firstPass(std::string file_name) {
+void CopyModelOld::firstPass(std::string file_name) {
     
     std::ifstream file(file_name);
 
@@ -114,23 +88,23 @@ void CopyModel::firstPass(std::string file_name) {
     probability_distribution = std::map<char, double>(base_distribution->distribution);
 }
 
-bool CopyModel::eof() {
+bool CopyModelOld::eof() {
     return current_position >= reading_strategy->end_of_stream();
 }
 
-void CopyModel::reset() {
+void CopyModelOld::reset() {
     current_position = 0;
     alphabet_counts.clear();
     pointer_map.clear();
 }
 
-double CopyModel::calculateProbability() {
+double CopyModelOld::calculateProbability() {
     int hits = pointer_map[current_pattern].hits;
     int misses = pointer_map[current_pattern].misses; 
     return (hits + alpha) / (hits + misses + 2 * alpha);
 }
 
-void CopyModel::setRemainderProbabilities(char exception, double probability_to_distribute) {
+void CopyModelOld::setRemainderProbabilities(char exception, double probability_to_distribute) {
     double base_remainder_total = 0.0;
     for (auto pair : base_distribution->distribution)
         if (pair.first != exception)

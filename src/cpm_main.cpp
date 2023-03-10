@@ -116,8 +116,9 @@ int main(int argc, char** argv) {
 
     model.initializeWithMostFrequent();
     while (!model.eof()) {
-        model.advance();
+        model.registerPattern();
         model.predict();
+        model.advance();
         outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
     }
 
