@@ -4,7 +4,7 @@
 
 
 bool StaticCopyPointerThreshold::surpassedThreshold(double hit_probability) {
-    return hit_probability < 0.5;
+    return hit_probability < static_threshold;
 }
 
 void StaticCopyPointerThreshold::reset() {}

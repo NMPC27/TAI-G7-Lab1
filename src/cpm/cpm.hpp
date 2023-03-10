@@ -17,7 +17,11 @@ public:
 };
 
 class StaticCopyPointerThreshold : public CopyPointerThreshold {
+
+    double static_threshold;
+
 public:
+    StaticCopyPointerThreshold(double st) : static_threshold(st) {}
     bool surpassedThreshold(double hit_probability);
     void reset();
 };
