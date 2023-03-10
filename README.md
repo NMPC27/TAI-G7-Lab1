@@ -7,7 +7,7 @@
 ## Building
 
 In order to build the project, first create a `build` directory and generate a CMake native build environment.
-If using Unix, run:
+If using Linux, run:
 
 ```
 mkdir build
