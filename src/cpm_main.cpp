@@ -7,7 +7,7 @@
 #include <vector>
 #include <cmath>
 #include "unistd.h"
-#include "cpm.hpp"
+#include "cpm/cpm.hpp"
 #include "cpm_main.hpp"
 
 using namespace std;
