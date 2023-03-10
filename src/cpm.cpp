@@ -68,6 +68,8 @@ bool CopyModel::predict() {
     prediction = reading_strategy->at(predict_index);
     char actual = reading_strategy->at(current_position + 1);
 
+    hit_probability = calculateProbability();
+
     bool hit = prediction == actual;
 
     if (hit) {
@@ -75,8 +77,6 @@ bool CopyModel::predict() {
     } else {
         pointer_map[current_pattern].misses++;
     }
-
-    hit_probability = calculateProbability();
 
     // Check whether copy pointer should be changed
     if (pointer_threshold->surpassedThreshold(hit_probability)) {
