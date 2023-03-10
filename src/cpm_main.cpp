@@ -7,7 +7,7 @@
 #include <vector>
 #include <cmath>
 #include "unistd.h"
-#include "cpm.hpp"
+#include "cpm/cpm.hpp"
 #include "cpm_main.hpp"
 
 using namespace std;
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
 
     // TODO: obtain from passed arguments
     InMemoryReadingStrategy imrs = InMemoryReadingStrategy();
-    StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold();
+    StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold(0.5);
     RecentCopyPointerManager rcpm = RecentCopyPointerManager();
     UniformDistribution ud = UniformDistribution();
     reading_strategy = &imrs;
