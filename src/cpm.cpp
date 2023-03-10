@@ -1,175 +1,137 @@
-#include <iostream>
 #include <fstream>
-#include <map>
 #include <algorithm>
-#include <string>
-#include <list>
-#include <vector>
-#include <cmath>
-#include "unistd.h"
-#include "copy_model.hpp"
 #include "cpm.hpp"
 
-using namespace std;
 
-
-int main(int argc, char** argv) {
-
-    int c;
-    int k = 4;
-    double alpha = 0.1;
-    ReadingStrategy* reading_strategy;
-    CopyPointerThreshold* pointer_threshold;
-    CopyPointerManager* pointer_manager;
-    BaseDistribution* base_distribution;
-
-    while ((c = getopt(argc, argv, "hbk:a:p:r:t:")) != -1){
-        switch(c){
-            case 'h':
-                printUsage(argv[0]);
-                printOptions();
-                return 0;
-            case 'k':
-                k = stoi(optarg);
-                break;
-            case 'a':
-                alpha = stof(optarg);
-                break;
-            case 'p': //! NOT DONE
-                if (optarg[0] == 'u') {
-                    //base_distribution = "uniform_distribution"; 
-                } else if (optarg[0] == 'd') {
-                    //base_distribution = "default_distribution";
-                } else {
-                    cout << "Invalid option for -p" << endl;
-                    return 1;
-                }
-                break;
-            case 'b': //! NOT DONE - ler file em binario
-                break;
-            case 'r': //! NOT DONE
-                if (optarg[0] == 'o') {
-                    //copy_pointer_reposition = "oldest";
-                } else if (optarg[0] == 'n') {
-                    //copy_pointer_reposition = "newer";
-                } else {
-                    cout << "Invalid option for -r" << endl;
-                    return 1;
-                }
-                break;
-            
-            case 't':
-                {
-                    string optarg_string = string(optarg);
-
-                    int pos = optarg_string.find(":");
-                    if (pos == -1) {
-                        cout << "Invalid option for -t: " << optarg << endl;
-                        return 1;
-                    }
-
-                    string opt = optarg_string.substr(0, pos);
-                    string value = optarg_string.substr(pos+1, optarg_string.length());
-
-                    if (opt == "n") {
-                        //threshold = "static_probability";
-                        //threshold_value = stof(value);
-                    } else if (opt == "f") {
-                        //threshold = "number_of_successive_fails";
-                        //threshold_value = stoi(value);
-                    } else if (opt == "c") {
-                        //threshold = "absolute_value_of_the_negative_derivative";
-                        //threshold_value = stof(value);
-                    } else {
-                        cout << "Invalid option for -t: " << optarg << endl;
-                        return 1;
-                    }
-                }
-
-                break;                
-
-            case '?':
-                printUsage(argv[0]);
-                return 1;
-        }
-    }
-
-    if (optind == argc) {
-        cout << "Error: no file was specified!" << endl;
-        return 1;
-    }
-
-    // TODO: obtain from passed arguments
-    InMemoryReadingStrategy imrs = InMemoryReadingStrategy();
-    StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold();
-    RecentCopyPointerManager rcpm = RecentCopyPointerManager();
-    UniformDistribution ud = UniformDistribution();
-    reading_strategy = &imrs;
-    pointer_threshold = &scpt;
-    pointer_manager = &rcpm;
-    base_distribution = &ud;
-
-    CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
-
-    string fileName = string(argv[optind]);
-    model.firstPass(fileName);
-
-    model.initializeWithMostFrequent();
-    while (!model.eof()) {
-        if (model.advance()) {
-            model.predict();
-            outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
-        }
-    }
-
-    return 0;
+bool StaticCopyPointerThreshold::surpassedThreshold(double hit_probability) {
+    return hit_probability < 0.5;
 }
 
-// TODO: What should the model provide, and how?
-void outputProbabilityDistribution(char prediction, double hit_probability, map<char, double> base_distribution) {
-    cout << "Prediction: '" << prediction << "', " << hit_probability << " | Distribution: ";
-    for (auto pair : base_distribution) {
-        cout << "('" << pair.first << "', " << pair.second << ") ";
+int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
+    return current_copy_pointer + 1;
+}
+
+void UniformDistribution::setBaseDistribution(std::map<char, int> histogram) {
+    distribution.clear();
+
+    for (auto pair : histogram)
+        distribution[pair.first] = 1.0 / histogram.size();
+}
+
+void FrequencyDistribution::setBaseDistribution(std::map<char, int> histogram){
+    distribution.clear();
+
+    int total = 0;
+    for (auto pair : histogram)
+        total += pair.second;
+
+    for (auto pair : histogram)
+        distribution[pair.first] = (double) pair.second / total;
+}
+
+void CopyModel::initializeWithMostFrequent() {
+    auto max_pair = std::max_element(alphabet_counts.begin(), alphabet_counts.end(),
+            [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
+    );
+
+    current_pattern = std::string(k, max_pair->first);
+}
+
+void CopyModel::advance() {
+    current_pattern += reading_strategy->at(current_position++);
+    current_pattern.erase(0, 1);
+
+    if (pointer_map.count(current_pattern) == 0) {
+
+        struct PatternInfo pattern_info = {
+            .pointers = {current_position - 1},
+            .copy_pointer_index = 0,
+            .hits = 0,
+            .misses = 0
+        };
+
+        pointer_map.insert({current_pattern, pattern_info});
+
     }
-    cout << endl;
+
+    pointer_map[current_pattern].pointers.push_back(current_position);
 }
 
-void printUsage(char* prog_name) {
-    cout << "Usage: " << prog_name << " [OPTIONS] file" << endl;
-}
+bool CopyModel::predict() {
+    int predict_index = pointer_map[current_pattern].pointers[ pointer_map[current_pattern].copy_pointer_index ] + 1;
 
-void printOptions() {
-    cout << "Options:" << endl;
-    cout << "\t-h\t\tShow this help message" << endl;
-    cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
-    cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
-    cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: d):" << endl;
-    cout << "\t\t\t\tu - uniform distribution" << endl;
-    cout << "\t\t\t\td - distribution based on the symbols' relative frequencies" << endl;
-    cout << "\t-b\t\tRead file in binary" << endl;
-    cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
-    cout << "\t\t\t\to - oldest" << endl;
-    cout << "\t\t\t\tn - newer" << endl;
-    cout << "\t-t T\t\tThreshold for copy pointer switch (default: n:0.50):" << endl;
-    cout << "\t\t\t\tn:X - static probability below X" << endl;
-    cout << "\t\t\t\tf:X - number of successive fails above X" << endl; //! temos de ver que o numero faz sentido
-    cout << "\t\t\t\tc:X - absolute value of the negative derivative of the prediction probability above X" << endl;
-}
+    prediction = reading_strategy->at(predict_index);
+    char actual = reading_strategy->at(current_position + 1);
 
-void printAlphabet(map<char, double> pointer_map) {
+    bool hit = prediction == actual;
 
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : " << it->second << endl;
+    if (hit) {
+        pointer_map[current_pattern].hits++;
+    } else {
+        pointer_map[current_pattern].misses++;
     }
+
+    hit_probability = calculateProbability();
+
+    // Check whether copy pointer should be changed
+    if (pointer_threshold->surpassedThreshold(hit_probability)) {
+        pointer_map[current_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[current_pattern].pointers, pointer_map[current_pattern].copy_pointer_index);
+
+        pointer_map[current_pattern].hits = 0;
+        pointer_map[current_pattern].misses = 0;
+    }
+
+    // Update internal probability distribution
+    setRemainderProbabilities(prediction, 1.0 - hit_probability);
+    probability_distribution[prediction] = hit_probability;
+
+    return hit;
 }
 
-void printMap(map<string, list<int>> pointer_map) {
+void CopyModel::firstPass(std::string file_name) {
+    
+    std::ifstream file(file_name);
 
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : ";
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            cout << *it2 << " ";
-        }
-        cout << endl;
+    char c = file.get();
+    
+    while (!file.eof()) {
+        reading_strategy->read(c);
+
+        alphabet_counts.insert({c, 0});
+        alphabet_counts[c]++;
+
+        c = file.get();
     }
+
+    file.close();
+
+    base_distribution->setBaseDistribution(alphabet_counts);
+    probability_distribution = std::map<char, double>(base_distribution->distribution);
+}
+
+bool CopyModel::eof() {
+    return current_position >= reading_strategy->end_of_stream();
+}
+
+void CopyModel::reset() {
+    current_position = 0;
+    alphabet_counts.clear();
+    pointer_map.clear();
+}
+
+double CopyModel::calculateProbability() {
+    int hits = pointer_map[current_pattern].hits;
+    int misses = pointer_map[current_pattern].misses; 
+    return (hits + alpha) / (hits + misses + 2 * alpha);
+}
+
+void CopyModel::setRemainderProbabilities(char exception, double probability_to_distribute) {
+    double base_remainder_total = 0.0;
+    for (auto pair : base_distribution->distribution)
+        if (pair.first != exception)
+            base_remainder_total += pair.second;
+    
+    for (auto pair : base_distribution->distribution)
+        if (pair.first != exception)
+            probability_distribution[pair.first] = probability_to_distribute * base_distribution->distribution[pair.first] / base_remainder_total;
 }
