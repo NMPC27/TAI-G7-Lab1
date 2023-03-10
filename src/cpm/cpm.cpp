@@ -7,6 +7,21 @@ bool StaticCopyPointerThreshold::surpassedThreshold(double hit_probability) {
     return hit_probability < 0.5;
 }
 
+void StaticCopyPointerThreshold::reset() {}
+
+bool DerivativeCopyPointerThreshold::surpassedThreshold(double hit_probability) {
+    if (previous_hit_probability == -1)
+        previous_hit_probability = hit_probability;
+
+    double derivative = hit_probability - previous_hit_probability;
+    previous_hit_probability = hit_probability;
+    return derivative < derivative_threshold;
+}
+
+void DerivativeCopyPointerThreshold::reset() {
+    previous_hit_probability = -1;
+}
+
 int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
     return current_copy_pointer + 1;
 }
@@ -84,6 +99,7 @@ bool CopyModel::predict() {
 
         pointer_map[current_pattern].hits = 0;
         pointer_map[current_pattern].misses = 0;
+        pointer_threshold->reset();
     }
 
     // Update internal probability distribution
