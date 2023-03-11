@@ -6,8 +6,6 @@
 struct PatternInfo {
     std::vector<size_t> pointers;
     int copy_pointer_index;     // Pattern's last symbol
-    int hits;
-    int misses;
 };
 
 class CopyPointerThreshold {
@@ -84,6 +82,8 @@ class CopyModel {
     std::string current_pattern;
     size_t copy_position = -1;
     std::string copy_pattern;
+    int hits = 0;
+    int misses = 0;
 
 public:
     CopyModel(int k, double alpha, ReadingStrategy* rs, CopyPointerThreshold* pt, CopyPointerManager* pm, BaseDistribution* bd) : k(k), alpha(alpha), reading_strategy(rs), pointer_threshold(pt), pointer_manager(pm), base_distribution(bd) {}

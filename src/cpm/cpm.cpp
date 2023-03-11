@@ -63,8 +63,6 @@ void CopyModel::registerPattern() {
         struct PatternInfo pattern_info = {
             .pointers = {current_position},
             .copy_pointer_index = 0,
-            .hits = 0,
-            .misses = 0
         };
 
         pointer_map.insert({current_pattern, pattern_info});
@@ -76,13 +74,16 @@ void CopyModel::registerPattern() {
 }
 
 void CopyModel::advance() {
+    // Update current pattern and advance read pointer (current_position)
     current_pattern += reading_strategy->at(current_position++);
     current_pattern.erase(0, 1);
+    // Advance copy pointer
+    copy_position++;
     
 }
 
 bool CopyModel::predict() {
-    int predict_index = pointer_map[current_pattern].pointers[ pointer_map[current_pattern].copy_pointer_index ] + 1;
+    int predict_index = copy_position + 1;
 
     prediction = reading_strategy->at(predict_index);
     actual = reading_strategy->at(current_position + 1);
@@ -92,17 +93,21 @@ bool CopyModel::predict() {
     bool hit = prediction == actual;
 
     if (hit) {
-        pointer_map[current_pattern].hits++;
+        hits++;
     } else {
-        pointer_map[current_pattern].misses++;
+        misses++;
     }
 
     // Check whether copy pointer should be changed
     if (pointer_threshold->surpassedThreshold(hit_probability)) {
-        pointer_map[current_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[current_pattern].pointers, pointer_map[current_pattern].copy_pointer_index);
 
-        pointer_map[current_pattern].hits = 0;
-        pointer_map[current_pattern].misses = 0;
+        pointer_map[current_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[current_pattern].pointers, pointer_map[current_pattern].copy_pointer_index);
+        // change copy pointer to a new one, this one being from the current pattern
+        copy_position = pointer_map[current_pattern].pointers[pointer_map[current_pattern].copy_pointer_index];
+        copy_pattern = current_pattern;
+
+        hits = 0;
+        misses = 0;
         pointer_threshold->reset();
     }
 
@@ -144,8 +149,6 @@ int CopyModel::countOf(char c) {
 }
 
 double CopyModel::calculateProbability() {
-    int hits = pointer_map[current_pattern].hits;
-    int misses = pointer_map[current_pattern].misses; 
     return (hits + alpha) / (hits + misses + 2 * alpha);
 }
 
