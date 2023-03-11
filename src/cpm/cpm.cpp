@@ -143,12 +143,6 @@ int CopyModel::countOf(char c) {
     return alphabet_counts[c];
 }
 
-void CopyModel::reset() {
-    current_position = 0;
-    alphabet_counts.clear();
-    pointer_map.clear();
-}
-
 double CopyModel::calculateProbability() {
     int hits = pointer_map[current_pattern].hits;
     int misses = pointer_map[current_pattern].misses; 

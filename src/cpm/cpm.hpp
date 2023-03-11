@@ -92,7 +92,6 @@ public:
     void advance();
     void firstPass(std::string);
     bool eof();
-    void reset();
     int countOf(char);
     
     void initializeWithMostFrequent();
