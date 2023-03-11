@@ -55,6 +55,7 @@ void CopyModel::initializeWithMostFrequent() {
 
     current_pattern = std::string(k-1, max_pair->first);
     current_pattern += reading_strategy->at(current_position);
+    copy_pattern = current_pattern;
 }
 
 void CopyModel::registerPattern() {
@@ -101,7 +102,7 @@ bool CopyModel::predict() {
     // Check whether copy pointer should be changed
     if (pointer_threshold->surpassedThreshold(hit_probability)) {
 
-        pointer_map[current_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[current_pattern].pointers, pointer_map[current_pattern].copy_pointer_index);
+        pointer_map[copy_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[copy_pattern].pointers, pointer_map[copy_pattern].copy_pointer_index);
         // change copy pointer to a new one, this one being from the current pattern
         copy_position = pointer_map[current_pattern].pointers[pointer_map[current_pattern].copy_pointer_index];
         copy_pattern = current_pattern;
