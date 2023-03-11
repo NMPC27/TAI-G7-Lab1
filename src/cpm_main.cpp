@@ -18,42 +18,54 @@ int main(int argc, char** argv) {
     int c;
     int k = 4;
     double alpha = 0.1;
-    ReadingStrategy* reading_strategy;
-    CopyPointerThreshold* pointer_threshold;
-    CopyPointerManager* pointer_manager;
-    BaseDistribution* base_distribution;
+    bool verbose = false;
+    ReadingStrategy* reading_strategy = nullptr;
+    CopyPointerThreshold* pointer_threshold = nullptr;
+    CopyPointerManager* pointer_manager = nullptr;
+    BaseDistribution* base_distribution = nullptr;
 
-    while ((c = getopt(argc, argv, "hbk:a:p:r:t:")) != -1){
+    while ((c = getopt(argc, argv, "hvbk:a:p:r:t:")) != -1){
         switch(c){
             case 'h':
                 printUsage(argv[0]);
                 printOptions();
                 return 0;
+
+            case 'v':
+                verbose = true;
+                break;
+
             case 'k':
                 k = stoi(optarg);
                 break;
+
             case 'a':
                 alpha = stof(optarg);
                 break;
-            case 'p': //! NOT DONE
+
+            case 'p':
                 if (optarg[0] == 'u') {
-                    //base_distribution = "uniform_distribution"; 
-                } else if (optarg[0] == 'd') {
-                    //base_distribution = "default_distribution";
+                    base_distribution = new UniformDistribution(); 
+                } else if (optarg[0] == 'f') {
+                    base_distribution = new FrequencyDistribution();
                 } else {
-                    cout << "Invalid option for -p" << endl;
+                    cout << "Error: invalid option for '-p' (" << optarg[0] << ")" << endl;
                     return 1;
                 }
                 break;
-            case 'b': //! NOT DONE - ler file em binario
+
+            case 'b':
+                cout << "Error: '-b' option currently not supported" << endl;
+                return 1;
                 break;
-            case 'r': //! NOT DONE
+
+            case 'r':
                 if (optarg[0] == 'o') {
-                    //copy_pointer_reposition = "oldest";
+                    pointer_manager = new NextOldestCopyPointerManager();
                 } else if (optarg[0] == 'n') {
-                    //copy_pointer_reposition = "newer";
+                    pointer_manager = new RecentCopyPointerManager();
                 } else {
-                    cout << "Invalid option for -r" << endl;
+                    cout << "Error: invalid option for '-r' (" << optarg[0] << ")" << endl;
                     return 1;
                 }
                 break;
@@ -64,7 +76,7 @@ int main(int argc, char** argv) {
 
                     int pos = optarg_string.find(":");
                     if (pos == -1) {
-                        cout << "Invalid option for -t: " << optarg << endl;
+                        cout << "Error: invalid option for '-t' (" << optarg << ")" << endl;
                         return 1;
                     }
 
@@ -72,20 +84,21 @@ int main(int argc, char** argv) {
                     string value = optarg_string.substr(pos+1, optarg_string.length());
 
                     if (opt == "n") {
-                        //threshold = "static_probability";
-                        //threshold_value = stof(value);
+                        double threshold_value = stof(value);
+                        pointer_threshold = new StaticCopyPointerThreshold(threshold_value);
                     } else if (opt == "f") {
-                        //threshold = "number_of_successive_fails";
-                        //threshold_value = stoi(value);
+                        //int threshold_value = stoi(value);
+                        //pointer_threshold = "number_of_successive_fails";
+                        cout << "Error: '-t f:X' option currently not supported" << endl;
+                        return 1;
                     } else if (opt == "c") {
-                        //threshold = "absolute_value_of_the_negative_derivative";
-                        //threshold_value = stof(value);
+                        double threshold_value = stof(value);
+                        pointer_threshold = new DerivativeCopyPointerThreshold(threshold_value);
                     } else {
-                        cout << "Invalid option for -t: " << optarg << endl;
+                        cout << "Error: invalid option for '-t' (" << optarg << ")" << endl;
                         return 1;
                     }
                 }
-
                 break;                
 
             case '?':
@@ -95,37 +108,52 @@ int main(int argc, char** argv) {
     }
 
     if (optind == argc) {
+        printUsage(argv[0]);
         cout << "Error: no file was specified!" << endl;
         return 1;
     }
 
-    // TODO: obtain from passed arguments
-    InMemoryReadingStrategy imrs = InMemoryReadingStrategy();
-    StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold(0.5);
-    RecentCopyPointerManager rcpm = RecentCopyPointerManager();
-    UniformDistribution ud = UniformDistribution();
-    reading_strategy = &imrs;
-    pointer_threshold = &scpt;
-    pointer_manager = &rcpm;
-    base_distribution = &ud;
+    // Defaults
+    if (reading_strategy == nullptr) reading_strategy = new InMemoryReadingStrategy();
+    if (pointer_threshold == nullptr) pointer_threshold = new StaticCopyPointerThreshold(0.5);
+    if (pointer_manager == nullptr) pointer_manager = new NextOldestCopyPointerManager();
+    if (base_distribution == nullptr) base_distribution = new UniformDistribution();
 
     CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
 
     string fileName = string(argv[optind]);
     model.firstPass(fileName);
 
+    map<char, double> information_sums;
+
     model.initializeWithMostFrequent();
     while (!model.eof()) {
         model.registerPattern();
-        model.predict();
+        bool hit = model.predict();
         model.advance();
-        outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+
+        // The probability distribution that the model provides doesn't account for whether or not the current prediction was a success,
+        // as that would incorporate information from the future which would not be known to the decoder.
+        if (verbose) outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+        information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }
+
+    delete reading_strategy;
+    delete pointer_threshold;
+    delete pointer_manager;
+    delete base_distribution;
+
+    double information_sum = 0.0;
+    cout << "Average amount of information in symbol..." << endl;
+    for (auto pair : information_sums) {
+        cout << pair.first << ": " << pair.second / model.countOf(pair.first) << " bits" << endl;
+        information_sum += pair.second;
+    }
+    cout << "Total amount of information: " << information_sum << " bits" << endl;
 
     return 0;
 }
 
-// TODO: What should the model provide, and how?
 void outputProbabilityDistribution(char prediction, double hit_probability, map<char, double> base_distribution) {
     cout << "Prediction: '" << prediction << "', " << hit_probability << " | Distribution: ";
     for (auto pair : base_distribution) {
@@ -141,11 +169,12 @@ void printUsage(char* prog_name) {
 void printOptions() {
     cout << "Options:" << endl;
     cout << "\t-h\t\tShow this help message" << endl;
+    cout << "\t-v\t\tVerbose output (output probability distribution at each encoding step)" << endl;
     cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
     cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
-    cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: d):" << endl;
+    cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: f):" << endl;
     cout << "\t\t\t\tu - uniform distribution" << endl;
-    cout << "\t\t\t\td - distribution based on the symbols' relative frequencies" << endl;
+    cout << "\t\t\t\tf - distribution based on the symbols' relative frequencies" << endl;
     cout << "\t-b\t\tRead file in binary" << endl;
     cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
     cout << "\t\t\t\to - oldest" << endl;

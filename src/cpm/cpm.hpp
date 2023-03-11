@@ -47,6 +47,11 @@ public:
     int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
 };
 
+class NextOldestCopyPointerManager : public CopyPointerManager {
+public:
+    int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+};
+
 class BaseDistribution {
 public:
     virtual void setBaseDistribution(std::map<char, int> histogram) = 0;
@@ -87,7 +92,7 @@ public:
     void advance();
     void firstPass(std::string);
     bool eof();
-    void reset();
+    int countOf(char);
     
     void initializeWithMostFrequent();
 
@@ -95,6 +100,7 @@ public:
     std::map<char, double> probability_distribution;
     double hit_probability = 0;
     char prediction = '\0';
+    char actual = '\0';
 
 private:
     double calculateProbability();

@@ -23,6 +23,10 @@ void DerivativeCopyPointerThreshold::reset() {
 }
 
 int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
+    return copy_pointers.size() - 1;
+}
+
+int NextOldestCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
     return current_copy_pointer + 1;
 }
 
@@ -81,7 +85,7 @@ bool CopyModel::predict() {
     int predict_index = pointer_map[current_pattern].pointers[ pointer_map[current_pattern].copy_pointer_index ] + 1;
 
     prediction = reading_strategy->at(predict_index);
-    char actual = reading_strategy->at(current_position + 1);
+    actual = reading_strategy->at(current_position + 1);
 
     hit_probability = calculateProbability();
 
@@ -135,10 +139,8 @@ bool CopyModel::eof() {
     return current_position + 1 >= reading_strategy->endOfStream();
 }
 
-void CopyModel::reset() {
-    current_position = 0;
-    alphabet_counts.clear();
-    pointer_map.clear();
+int CopyModel::countOf(char c) {
+    return alphabet_counts[c];
 }
 
 double CopyModel::calculateProbability() {
