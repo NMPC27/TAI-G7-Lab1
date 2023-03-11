@@ -23,6 +23,10 @@ void DerivativeCopyPointerThreshold::reset() {
 }
 
 int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
+    return copy_pointers.size() - 1;
+}
+
+int NextOldestCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
     return current_copy_pointer + 1;
 }
 

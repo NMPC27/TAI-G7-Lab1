@@ -47,6 +47,11 @@ public:
     int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
 };
 
+class NextOldestCopyPointerManager : public CopyPointerManager {
+public:
+    int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+};
+
 class BaseDistribution {
 public:
     virtual void setBaseDistribution(std::map<char, int> histogram) = 0;
