@@ -8,7 +8,7 @@
 #include <cmath>
 #include "unistd.h"
 #include "cpm/cpm.hpp"
-#include "cpm_main.hpp"
+#include "main.hpp"
 
 using namespace std;
 
