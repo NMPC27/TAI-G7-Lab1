@@ -93,6 +93,7 @@ public:
     void firstPass(std::string);
     bool eof();
     void reset();
+    int countOf(char);
     
     void initializeWithMostFrequent();
 
@@ -100,6 +101,7 @@ public:
     std::map<char, double> probability_distribution;
     double hit_probability = 0;
     char prediction = '\0';
+    char actual = '\0';
 
 private:
     double calculateProbability();
