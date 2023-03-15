@@ -22,8 +22,25 @@ void DerivativeCopyPointerThreshold::reset() {
     previous_hit_probability = -1;
 }
 
+bool SuccessFailsCopyPointerThreshold::surpassedThreshold(double hit_probability) {
+    if (previous_hit_probability == -1)
+        previous_hit_probability = hit_probability;
+
+    bool fail = hit_probability < previous_hit_probability;
+    if (fail) fails_count++;
+    else fails_count = fails_count > 0 ? fails_count - 1 : 0;
+
+    return fails_count >= fails_threshold;
+}
+
+void SuccessFailsCopyPointerThreshold::reset() {
+    previous_hit_probability = -1;
+    fails_count = 0;
+}
+
+// second to last copy pointer (because most recent could lead to predicting future)
 int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
-    return copy_pointers.size() - 1;
+    return copy_pointers.size() - 2;
 }
 
 int NextOldestCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
@@ -53,12 +70,12 @@ void CopyModel::initializeWithMostFrequent() {
             [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
     );
 
-    current_pattern = std::string(k-1, max_pair->first);
-    current_pattern += reading_strategy->at(current_position);
+    current_pattern = std::string(k, max_pair->first);
     copy_pattern = current_pattern;
 }
 
-void CopyModel::registerPattern() {
+// returns true if the pattern is found in the map
+bool CopyModel::registerPattern() {
     if (pointer_map.count(current_pattern) == 0) {
 
         struct PatternInfo pattern_info = {
@@ -67,10 +84,12 @@ void CopyModel::registerPattern() {
         };
 
         pointer_map.insert({current_pattern, pattern_info});
-
+        
+        return false;
     }
     else {
         pointer_map[current_pattern].pointers.push_back(current_position);
+        return true;
     }
 }
 
@@ -84,10 +103,15 @@ void CopyModel::advance() {
 }
 
 bool CopyModel::predict() {
-    int predict_index = copy_position + 1;
+    if (first_prediction) {
+        // The copy_pointer_index is initialized at 0. Therefore, the copy_position should be the only other pointer that doesn't point to the current position
+        copy_position = pointer_map[current_pattern].pointers[pointer_map[current_pattern].copy_pointer_index];
+        copy_pattern = current_pattern;
+        first_prediction = false;
+    }
 
-    prediction = reading_strategy->at(predict_index);
-    actual = reading_strategy->at(current_position + 1);
+    prediction = reading_strategy->at(copy_position);
+    actual = reading_strategy->at(current_position);
 
     hit_probability = calculateProbability();
 
@@ -103,7 +127,7 @@ bool CopyModel::predict() {
     if (pointer_threshold->surpassedThreshold(hit_probability)) {
 
         pointer_map[copy_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[copy_pattern].pointers, pointer_map[copy_pattern].copy_pointer_index);
-        // change copy pointer to a new one, this one being from the current pattern
+        // Change copy pointer to a new one, this one being from the current pattern
         copy_position = pointer_map[current_pattern].pointers[pointer_map[current_pattern].copy_pointer_index];
         copy_pattern = current_pattern;
 
@@ -162,4 +186,16 @@ void CopyModel::setRemainderProbabilities(char exception, double probability_to_
     for (auto pair : base_distribution->distribution)
         if (pair.first != exception)
             probability_distribution[pair.first] = probability_to_distribute * base_distribution->distribution[pair.first] / base_remainder_total;
+}
+
+
+void CopyModel::guess() {
+
+    actual = reading_strategy->at(current_position + 1);
+    
+    // Just return the base distribution
+    prediction = '\0';
+    hit_probability = 0;
+    // TODO: maybe we shouldn't copy like this! this allows for editing the base distribution from outside
+    probability_distribution = base_distribution->distribution;
 }

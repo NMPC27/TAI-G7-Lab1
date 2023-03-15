@@ -87,10 +87,15 @@ int main(int argc, char** argv) {
                         double threshold_value = stof(value);
                         pointer_threshold = new StaticCopyPointerThreshold(threshold_value);
                     } else if (opt == "f") {
-                        //int threshold_value = stoi(value);
-                        //pointer_threshold = "number_of_successive_fails";
-                        cout << "Error: '-t f:X' option currently not supported" << endl;
-                        return 1;
+                        int threshold_value = stoi(value);
+                        if (threshold_value > 0){
+                            pointer_threshold = new SuccessFailsCopyPointerThreshold(threshold_value);
+                        }else{
+                            cout << "Error: invalid option for '-t f:X' (" << optarg << ")" << endl;
+                            return 1;
+                        }
+                        //cout << "Error: '-t f:X' option currently not supported" << endl;
+                        
                     } else if (opt == "c") {
                         double threshold_value = stof(value);
                         pointer_threshold = new DerivativeCopyPointerThreshold(threshold_value);
@@ -116,8 +121,9 @@ int main(int argc, char** argv) {
     // Defaults
     if (reading_strategy == nullptr) reading_strategy = new InMemoryReadingStrategy();
     if (pointer_threshold == nullptr) pointer_threshold = new StaticCopyPointerThreshold(0.5);
+    if (pointer_threshold == nullptr) pointer_threshold = new SuccessFailsCopyPointerThreshold(3);
     if (pointer_manager == nullptr) pointer_manager = new NextOldestCopyPointerManager();
-    if (base_distribution == nullptr) base_distribution = new UniformDistribution();
+    if (base_distribution == nullptr) base_distribution = new FrequencyDistribution();
 
     CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
 
@@ -128,13 +134,36 @@ int main(int argc, char** argv) {
 
     model.initializeWithMostFrequent();
     while (!model.eof()) {
-        model.registerPattern();
-        bool hit = model.predict();
+        bool exists = model.registerPattern();
+
+        int output_color = exists ? 1 : 0;
+        if (exists) {
+            bool hit = model.predict();
+            output_color += hit ? 1 : 0;
+        // TODO: should we perform guesses like this? or "predict"?
+        } else {
+            model.guess();
+        }
         model.advance();
 
         // The probability distribution that the model provides doesn't account for whether or not the current prediction was a success,
         // as that would incorporate information from the future which would not be known to the decoder.
-        if (verbose) outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+        if (verbose) {
+            // string color;
+            // switch (output_color) {
+            //     // New pattern, doesn't exist
+            //     case 0:
+            //         color = "\033[]";
+            //         break;
+            //     // Pattern exists, but no hit
+            //     case 1:
+            //         break;
+            //     // Pattern exists, with hit
+            //     case 2:
+            //         break;
+            // }
+            outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+        }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }
 

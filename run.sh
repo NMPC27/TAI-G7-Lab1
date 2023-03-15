@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cmake --build build
-./bin/cpm "$@" example/test1.txt
+./bin/cpm "$@" example/chry.txt

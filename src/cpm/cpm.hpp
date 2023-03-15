@@ -35,6 +35,18 @@ public:
     void reset();
 };
 
+class SuccessFailsCopyPointerThreshold : public CopyPointerThreshold {
+
+    double previous_hit_probability = -1;
+    int fails_count = 0;
+    int fails_threshold;
+
+public:
+    SuccessFailsCopyPointerThreshold(double dt) : fails_threshold(dt) {}
+    bool surpassedThreshold(double hit_probability);
+    void reset();
+};
+
 class CopyPointerManager {
 public:
     virtual int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) = 0;
@@ -84,15 +96,17 @@ class CopyModel {
     std::string copy_pattern;
     int hits = 0;
     int misses = 0;
+    bool first_prediction = true;
 
 public:
     CopyModel(int k, double alpha, ReadingStrategy* rs, CopyPointerThreshold* pt, CopyPointerManager* pm, BaseDistribution* bd) : k(k), alpha(alpha), reading_strategy(rs), pointer_threshold(pt), pointer_manager(pm), base_distribution(bd) {}
-    void registerPattern();
+    bool registerPattern();
     bool predict();
     void advance();
     void firstPass(std::string);
     bool eof();
     int countOf(char);
+    void guess();
     
     void initializeWithMostFrequent();
 
