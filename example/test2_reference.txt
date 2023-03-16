@@ -1,0 +1,820 @@
+????
+    Guess: Uniform
+    Pointers:
+        ????: [-1]
+???G
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+??GA
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+?GAA
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+GAAT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+AATT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+ATTC
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+TTCT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+TCTA
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+CTAG
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+TAGG
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+AGGC
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+GGCT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+GCTT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+CTTA
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+TTAG
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+TAGT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+AGTT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+GTTT
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+TTTG
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+TTGG
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+TGGA
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+GGAA
+    Guess: Uniform
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21]
+GAAT
+    Predict:
+        Copy position: 3
+        Copy pattern: GAAT
+        Current position: 22
+        Prediction: T
+        Actual: T
+        Hit probability: 0.5
+        Hits next: 1
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21]
+AATT
+    Predict:
+        Copy position: 4
+        Copy pattern: GAAT
+        Current position: 23
+        Prediction: C
+        Actual: C
+        Hit probability: 0.67
+        Hits next: 2
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+ATTC
+    Predict:
+        Copy position: 5
+        Copy pattern: GAAT
+        Current position: 24
+        Prediction: T
+        Actual: T
+        Hit probability: 0.75
+        Hits next: 3
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+TTCT
+    Predict:
+        Copy position: 6
+        Copy pattern: GAAT
+        Current position: 25
+        Prediction: A
+        Actual: A
+        Hit probability: 0.8
+        Hits next: 4
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+TCTA
+    Predict:
+        Copy position: 7
+        Copy pattern: GAAT
+        Current position: 26
+        Prediction: G
+        Actual: G
+        Hit probability: 0.83
+        Hits next: 5
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+CTAG
+    Predict:
+        Copy position: 8
+        Copy pattern: GAAT
+        Current position: 27
+        Prediction: G
+        Actual: G
+        Hit probability: 0.86
+        Hits next: 6
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+TAGG
+    Predict:
+        Copy position: 9
+        Copy pattern: GAAT
+        Current position: 28
+        Prediction: C
+        Actual: C
+        Hit probability: 0.875
+        Hits next: 7
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+AGGC
+    Predict:
+        Copy position: 10
+        Copy pattern: GAAT
+        Current position: 29
+        Prediction: T
+        Actual: T
+        Hit probability: 0.88
+        Hits next: 8
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+GGCT
+    Predict:
+        Copy position: 11
+        Copy pattern: GAAT
+        Current position: 30
+        Prediction: T
+        Actual: T
+        Hit probability: 0.9
+        Hits next: 9
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+GCTT
+    Predict:
+        Copy position: 12
+        Copy pattern: GAAT
+        Current position: 31
+        Prediction: A
+        Actual: A
+        Hit probability: 0.91
+        Hits next: 10
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12, 31]
+        CTTA: [13]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+CTTA
+    Predict:
+        Copy position: 13
+        Copy pattern: GAAT
+        Current position: 32
+        Prediction: G
+        Actual: G
+        Hit probability: 0.92
+        Hits next: 11
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12, 31]
+        CTTA: [13, 32]
+        TTAG: [14]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+TTAG
+    Predict:
+        Copy position: 14
+        Copy pattern: GAAT
+        Current position: 33
+        Prediction: T
+        Actual: T
+        Hit probability: 0.923
+        Hits next: 12
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12, 31]
+        CTTA: [13, 32]
+        TTAG: [14, 33]
+        TAGT: [15]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+TAGT
+    Predict:
+        Copy position: 15
+        Copy pattern: GAAT
+        Current position: 34
+        Prediction: T
+        Actual: T
+        Hit probability: 0.93
+        Hits next: 13
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12, 31]
+        CTTA: [13, 32]
+        TTAG: [14, 33]
+        TAGT: [15, 34]
+        AGTT: [16]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+AGTT
+    Predict:
+        Copy position: 16
+        Copy pattern: GAAT
+        Current position: 35
+        Prediction: T
+        Actual: T
+        Hit probability: 0.933
+        Hits next: 14
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12, 31]
+        CTTA: [13, 32]
+        TTAG: [14, 33]
+        TAGT: [15, 34]
+        AGTT: [16, 35]
+        GTTT: [17]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+GTTT
+    Predict:
+        Copy position: 17
+        Copy pattern: GAAT
+        Current position: 37
+        Prediction: G
+        Actual: G
+        Hit probability: 0.9375
+        Hits next: 15
+        Misses next: 0
+    Pointers:
+        ???G: [0]
+        ??GA: [1]
+        ?GAA: [2]
+        GAAT: [3, 22]
+        AATT: [4, 23]
+        ATTC: [5, 24]
+        TTCT: [6, 25]
+        TCTA: [7, 26]
+        CTAG: [8, 27]
+        TAGG: [9, 28]
+        AGGC: [10, 29]
+        GGCT: [11, 30]
+        GCTT: [12, 31]
+        CTTA: [13, 32]
+        TTAG: [14, 33]
+        TAGT: [15, 34]
+        AGTT: [16, 35]
+        GTTT: [17, 36]
+        TTTG: [18]
+        TTGG: [19]
+        TGGA: [20]
+        GGAA: [21] 
+TTTG
+   EOF 

@@ -70,7 +70,8 @@ void CopyModel::initializeWithMostFrequent() {
             [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
     );
 
-    current_pattern = std::string(k, max_pair->first);
+    // current_pattern = std::string(k, max_pair->first);
+    current_pattern = std::string(k, 'A');
     copy_pattern = current_pattern;
 }
 
@@ -95,7 +96,7 @@ bool CopyModel::registerPattern() {
 
 void CopyModel::advance() {
     // Update current pattern and advance read pointer (current_position)
-    current_pattern += reading_strategy->at(current_position++);
+    current_pattern += reading_strategy->at(++current_position);
     current_pattern.erase(0, 1);
     // Advance copy pointer
     copy_position++;
@@ -110,8 +111,8 @@ bool CopyModel::predict() {
         first_prediction = false;
     }
 
-    prediction = reading_strategy->at(copy_position);
-    actual = reading_strategy->at(current_position);
+    prediction = reading_strategy->at(copy_position + 1);
+    actual = reading_strategy->at(current_position + 1);
 
     hit_probability = calculateProbability();
 

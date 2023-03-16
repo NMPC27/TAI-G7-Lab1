@@ -90,7 +90,7 @@ class CopyModel {
     std::map<char, int> alphabet_counts;
     std::map<std::string, PatternInfo> pointer_map;
     
-    size_t current_position = 0;
+    size_t current_position = -1;
     std::string current_pattern;
     size_t copy_position = -1;
     std::string copy_pattern;
