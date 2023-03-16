@@ -8,4 +8,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Output final binaries to the 'bin' folder
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-add_executable(cpm src/cpm_main.cpp src/cpm/cpm.cpp src/cpm/parser.cpp)
+add_executable(cpm src/main.cpp src/cpm/cpm.cpp src/cpm/parser.cpp)
