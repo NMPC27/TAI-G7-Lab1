@@ -136,10 +136,10 @@ int main(int argc, char** argv) {
     while (!model.eof()) {
         bool exists = model.registerPattern();
 
-        int output_color = exists ? 1 : 0;
+        int output_color_condition = exists ? 1 : 0;
         if (exists) {
             bool hit = model.predict();
-            output_color += hit ? 1 : 0;
+            output_color_condition += hit ? 1 : 0;
         // TODO: should we perform guesses like this? or "predict"?
         } else {
             model.guess();
@@ -149,20 +149,24 @@ int main(int argc, char** argv) {
         // The probability distribution that the model provides doesn't account for whether or not the current prediction was a success,
         // as that would incorporate information from the future which would not be known to the decoder.
         if (verbose) {
-            // string color;
-            // switch (output_color) {
-            //     // New pattern, doesn't exist
-            //     case 0:
-            //         color = "\033[]";
-            //         break;
-            //     // Pattern exists, but no hit
-            //     case 1:
-            //         break;
-            //     // Pattern exists, with hit
-            //     case 2:
-            //         break;
-            // }
+            string output_color;
+            switch (output_color_condition) {
+                // New pattern, doesn't exist
+                case 0:
+                    output_color = "\e[0;33m";
+                    break;
+                // Pattern exists, but no hit
+                case 1:
+                    output_color = "\e[0;31m";
+                    break;
+                // Pattern exists, with hit
+                case 2:
+                    output_color = "\e[0;32m";
+                    break;
+            }
+            cout << output_color;
             outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+            cout << "\e[0m";
         }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }
