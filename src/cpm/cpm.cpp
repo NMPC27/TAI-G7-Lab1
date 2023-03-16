@@ -38,14 +38,54 @@ void SuccessFailsCopyPointerThreshold::reset() {
     fails_count = 0;
 }
 
-// second to last copy pointer (because most recent could lead to predicting future)
-int RecentCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
-    return copy_pointers.size() - 2;
+
+bool SimpleCopyPointerManager::registerCopyPointer(std::string pattern, size_t position) {
+    if (pointer_map.count(pattern) == 0) {
+
+        struct SimplePointerInfo pattern_info = {
+            .pointers = {position},
+            .copy_pointer_index = 0,
+        };
+
+        pointer_map.insert({pattern, pattern_info});
+        
+        return false;
+    }
+    
+    pointer_map[pattern].pointers.push_back(position);
+    return true;
 }
 
-int NextOldestCopyPointerManager::newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) {
-    return current_copy_pointer + 1;
+int SimpleCopyPointerManager::getCopyPointer(std::string pattern) {
+    return pointer_map[pattern].pointers[pointer_map[pattern].copy_pointer_index];
 }
+
+void SimpleCopyPointerManager::reportPrediction(std::string pattern, bool hit) {
+    if (hit) {
+        hits++;
+    } else {
+        misses++;
+    }
+}
+
+void SimpleCopyPointerManager::reset() {
+    hits = 0;
+    misses = 0;
+}
+
+int SimpleCopyPointerManager::getHits(std::string current_pattern) { return hits; }
+
+int SimpleCopyPointerManager::getMisses(std::string current_pattern) { return misses; }
+
+void RecentCopyPointerManager::repositionCopyPointer(std::string pattern) {
+    // second to last copy pointer (because most recent could lead to predicting future)
+    pointer_map[pattern].copy_pointer_index = pointer_map[pattern].pointers.size() - 2;
+}
+
+void NextOldestCopyPointerManager::repositionCopyPointer(std::string pattern) {
+    pointer_map[pattern].copy_pointer_index += 1;
+}
+
 
 void UniformDistribution::setBaseDistribution(std::map<char, int> histogram) {
     distribution.clear();
@@ -65,33 +105,19 @@ void FrequencyDistribution::setBaseDistribution(std::map<char, int> histogram){
         distribution[pair.first] = (double) pair.second / total;
 }
 
+
 void CopyModel::initializeWithMostFrequent() {
     auto max_pair = std::max_element(alphabet_counts.begin(), alphabet_counts.end(),
             [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
     );
 
-    // current_pattern = std::string(k, max_pair->first);
-    current_pattern = std::string(k, 'A');
+    current_pattern = std::string(k, max_pair->first);
     copy_pattern = current_pattern;
 }
 
-// returns true if the pattern is found in the map
+// Return true if the pattern is already in the map
 bool CopyModel::registerPattern() {
-    if (pointer_map.count(current_pattern) == 0) {
-
-        struct PatternInfo pattern_info = {
-            .pointers = {current_position},
-            .copy_pointer_index = 0,
-        };
-
-        pointer_map.insert({current_pattern, pattern_info});
-        
-        return false;
-    }
-    else {
-        pointer_map[current_pattern].pointers.push_back(current_position);
-        return true;
-    }
+    return pointer_manager->registerCopyPointer(current_pattern, current_position);
 }
 
 void CopyModel::advance() {
@@ -106,7 +132,7 @@ void CopyModel::advance() {
 bool CopyModel::predict() {
     if (first_prediction) {
         // The copy_pointer_index is initialized at 0. Therefore, the copy_position should be the only other pointer that doesn't point to the current position
-        copy_position = pointer_map[current_pattern].pointers[pointer_map[current_pattern].copy_pointer_index];
+        copy_position = pointer_manager->getCopyPointer(current_pattern);
         copy_pattern = current_pattern;
         first_prediction = false;
     }
@@ -114,26 +140,24 @@ bool CopyModel::predict() {
     prediction = reading_strategy->at(copy_position + 1);
     actual = reading_strategy->at(current_position + 1);
 
-    hit_probability = calculateProbability();
+
+    hit_probability = calculateProbability(
+        pointer_manager->getHits(current_pattern),
+        pointer_manager->getMisses(current_pattern));
 
     bool hit = prediction == actual;
 
-    if (hit) {
-        hits++;
-    } else {
-        misses++;
-    }
+    pointer_manager->reportPrediction(current_pattern, hit);
 
     // Check whether copy pointer should be changed
     if (pointer_threshold->surpassedThreshold(hit_probability)) {
 
-        pointer_map[copy_pattern].copy_pointer_index = pointer_manager->newCopyPointer(pointer_map[copy_pattern].pointers, pointer_map[copy_pattern].copy_pointer_index);
+        pointer_manager->repositionCopyPointer(copy_pattern);
         // Change copy pointer to a new one, this one being from the current pattern
-        copy_position = pointer_map[current_pattern].pointers[pointer_map[current_pattern].copy_pointer_index];
+        copy_position = pointer_manager->getCopyPointer(copy_pattern);
         copy_pattern = current_pattern;
 
-        hits = 0;
-        misses = 0;
+        pointer_manager->reset();
         pointer_threshold->reset();
     }
 
@@ -174,7 +198,7 @@ int CopyModel::countOf(char c) {
     return alphabet_counts[c];
 }
 
-double CopyModel::calculateProbability() {
+double CopyModel::calculateProbability(int hits, int misses) {
     return (hits + alpha) / (hits + misses + 2 * alpha);
 }
 

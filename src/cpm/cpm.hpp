@@ -3,10 +3,6 @@
 #include <map>
 #include "parser.hpp"
 
-struct PatternInfo {
-    std::vector<size_t> pointers;
-    int copy_pointer_index;     // Pattern's last symbol
-};
 
 class CopyPointerThreshold {
 public:
@@ -47,20 +43,49 @@ public:
     void reset();
 };
 
+
+struct SimplePointerInfo {
+    std::vector<size_t> pointers;
+    int copy_pointer_index;     // Pattern's last symbol
+};
+
 class CopyPointerManager {
 public:
-    virtual int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) = 0;
+    virtual int getCopyPointer(std::string) = 0;
+    virtual void repositionCopyPointer(std::string) = 0;
+    virtual bool registerCopyPointer(std::string, size_t) = 0;
+    virtual void reportPrediction(std::string, bool) = 0;
+    virtual void reset() = 0;
+    virtual int getHits(std::string) = 0;
+    virtual int getMisses(std::string) = 0;
 };
 
-class RecentCopyPointerManager : public CopyPointerManager {
+class SimpleCopyPointerManager : public CopyPointerManager {
+
+protected:
+    std::map<std::string, SimplePointerInfo> pointer_map;
+    int hits = 0;
+    int misses = 0;
+
 public:
-    int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+    int getCopyPointer(std::string);
+    bool registerCopyPointer(std::string, size_t);
+    void reportPrediction(std::string, bool);
+    void reset();
+    int getHits(std::string);
+    int getMisses(std::string);
 };
 
-class NextOldestCopyPointerManager : public CopyPointerManager {
+class RecentCopyPointerManager : public SimpleCopyPointerManager {
 public:
-    int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+    void repositionCopyPointer(std::string);
 };
+
+class NextOldestCopyPointerManager : public SimpleCopyPointerManager {
+public:
+    void repositionCopyPointer(std::string);
+};
+
 
 class BaseDistribution {
 public:
@@ -78,6 +103,7 @@ public:
     void setBaseDistribution(std::map<char, int> histogram);
 };
 
+
 class CopyModel {
 
     int k;
@@ -88,14 +114,11 @@ class CopyModel {
     BaseDistribution* base_distribution;
 
     std::map<char, int> alphabet_counts;
-    std::map<std::string, PatternInfo> pointer_map;
     
     size_t current_position = -1;
     std::string current_pattern;
     size_t copy_position = -1;
     std::string copy_pattern;
-    int hits = 0;
-    int misses = 0;
     bool first_prediction = true;
 
 public:
@@ -117,7 +140,7 @@ public:
     char actual = '\0';
 
 private:
-    double calculateProbability();
+    double calculateProbability(int, int);
     void setRemainderProbabilities(char, double);
 
 };

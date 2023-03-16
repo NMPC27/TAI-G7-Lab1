@@ -15,7 +15,7 @@ class CopyModelOld : public CopyModel {
     BaseDistribution* base_distribution;
 
     std::map<char, int> alphabet_counts;
-    std::map<std::string, PatternInfo> pointer_map;
+    std::map<std::string, SimplePointerInfo> pointer_map;
     
     size_t current_position = 0;
     std::string current_pattern;

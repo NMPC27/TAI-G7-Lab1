@@ -16,7 +16,7 @@ void CopyModelOld::initializeWithMostFrequent() {
 void CopyModelOld::registerPattern() {
     if (pointer_map.count(current_pattern) == 0) {
 
-        struct PatternInfo pattern_info = {
+        struct SimplePointerInfo pattern_info = {
             .pointers = {current_position},
             .copy_pointer_index = 0,
             .hits = 0,
