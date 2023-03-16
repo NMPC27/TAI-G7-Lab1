@@ -6,7 +6,8 @@
 #include <list>
 #include <vector>
 #include <cmath>
-#include "unistd.h"
+#include <sys/stat.h>
+#include <unistd.h>
 #include "cpm/cpm.hpp"
 #include "main.hpp"
 
@@ -127,8 +128,16 @@ int main(int argc, char** argv) {
 
     CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
 
-    string fileName = string(argv[optind]);
-    model.firstPass(fileName);
+    string file_name = string(argv[optind]);
+
+    struct stat file_status;
+    stat(file_name.c_str(), &file_status);
+    if (errno == ENOENT) {
+        cout << "Error: file '" << file_name << "' doesn't exist!" << endl;
+        return 1;
+    }
+
+    model.firstPass(file_name);
 
     map<char, double> information_sums;
 
