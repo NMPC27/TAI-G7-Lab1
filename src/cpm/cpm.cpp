@@ -1,5 +1,6 @@
 #include <fstream>
 #include <algorithm>
+#include <list>
 #include "cpm.hpp"
 
 
@@ -77,13 +78,60 @@ int SimpleCopyPointerManager::getHits(std::string current_pattern) { return hits
 
 int SimpleCopyPointerManager::getMisses(std::string current_pattern) { return misses; }
 
-void RecentCopyPointerManager::repositionCopyPointer(std::string pattern) {
+void RecentCopyPointerManager::repositionCopyPointer(std::string pattern, ReadingStrategy* reading_strategy) {
     // second to last copy pointer (because most recent could lead to predicting future)
     pointer_map[pattern].copy_pointer_index = pointer_map[pattern].pointers.size() - 2;
 }
 
-void NextOldestCopyPointerManager::repositionCopyPointer(std::string pattern) {
+void NextOldestCopyPointerManager::repositionCopyPointer(std::string pattern, ReadingStrategy* reading_strategy) {
     pointer_map[pattern].copy_pointer_index += 1;
+}
+
+void MostCommonCopyPointerManager::repositionCopyPointer(std::string pattern, ReadingStrategy* reading_strategy) {
+    
+    std::list<size_t> pointer_candidates(pointer_map[pattern].pointers.begin(), pointer_map[pattern].pointers.end());
+    
+    int count;
+    int offset = 1;
+    char most_frequent = '\0';
+
+    while (most_frequent == '\0' || count > 1){
+
+        count = 0;
+
+        // Majority algorithm: first pass (determine most frequent)
+        for (size_t pointer : pointer_candidates) {
+            char char_at_pointer = reading_strategy->at(pointer + offset);
+
+            if (count == 0) {
+                most_frequent = char_at_pointer;
+                count++;
+            } else if (most_frequent == char_at_pointer) {
+                count++;
+            } else {
+                count--;
+            }
+        }
+
+        // Majority algorithm: second pass (remove all pointers that don't match the most frequent)
+        for (std::list<size_t>::iterator it = pointer_candidates.begin(); it != pointer_candidates.end();) {
+            size_t pointer = *it;
+            if (reading_strategy->at(pointer + offset) == most_frequent)
+                it++;
+            else
+                it = pointer_candidates.erase(it);
+        }
+
+        offset++;
+    }
+
+    size_t pointer_candidate = pointer_candidates.front();
+    int i;
+    for (i = 0; i < pointer_map[pattern].pointers.size(); i++)
+        if (pointer_map[pattern].pointers[i] == pointer_candidate)
+            break;
+    pointer_map[pattern].copy_pointer_index = i;
+
 }
 
 
@@ -152,7 +200,7 @@ bool CopyModel::predict() {
     // Check whether copy pointer should be changed
     if (pointer_threshold->surpassedThreshold(hit_probability)) {
 
-        pointer_manager->repositionCopyPointer(copy_pattern);
+        pointer_manager->repositionCopyPointer(copy_pattern, reading_strategy);
         // Change copy pointer to a new one, this one being from the current pattern
         copy_position = pointer_manager->getCopyPointer(copy_pattern);
         copy_pattern = current_pattern;

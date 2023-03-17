@@ -52,7 +52,7 @@ struct SimplePointerInfo {
 class CopyPointerManager {
 public:
     virtual int getCopyPointer(std::string) = 0;
-    virtual void repositionCopyPointer(std::string) = 0;
+    virtual void repositionCopyPointer(std::string, ReadingStrategy*) = 0;
     virtual bool registerCopyPointer(std::string, size_t) = 0;
     virtual void reportPrediction(std::string, bool) = 0;
     virtual void reset() = 0;
@@ -76,14 +76,19 @@ public:
     int getMisses(std::string);
 };
 
+class MostCommonCopyPointerManager : public SimpleCopyPointerManager {
+public:
+    void repositionCopyPointer(std::string, ReadingStrategy*);    
+};
+
 class RecentCopyPointerManager : public SimpleCopyPointerManager {
 public:
-    void repositionCopyPointer(std::string);
+    void repositionCopyPointer(std::string, ReadingStrategy*);
 };
 
 class NextOldestCopyPointerManager : public SimpleCopyPointerManager {
 public:
-    void repositionCopyPointer(std::string);
+    void repositionCopyPointer(std::string, ReadingStrategy*);
 };
 
 
@@ -105,6 +110,8 @@ public:
 
 
 class CopyModel {
+
+    friend MostCommonCopyPointerManager;
 
     int k;
     double alpha;

@@ -65,6 +65,8 @@ int main(int argc, char** argv) {
                     pointer_manager = new NextOldestCopyPointerManager();
                 } else if (optarg[0] == 'n') {
                     pointer_manager = new RecentCopyPointerManager();
+                } else if (optarg[0] == 'm') {
+                    pointer_manager = new MostCommonCopyPointerManager();
                 } else {
                     cout << "Error: invalid option for '-r' (" << optarg[0] << ")" << endl;
                     return 1;
@@ -174,7 +176,7 @@ int main(int argc, char** argv) {
                     break;
             }
             cout << output_color;
-            outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+            outputProbabilityDistribution(model.prediction, model.actual, model.hit_probability, model.probability_distribution);
             cout << "\e[0m";
         }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
@@ -196,8 +198,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void outputProbabilityDistribution(char prediction, double hit_probability, map<char, double> base_distribution) {
-    cout << "Prediction: '" << prediction << "', " << hit_probability << " | Distribution: ";
+void outputProbabilityDistribution(char prediction, char actual, double hit_probability, map<char, double> base_distribution) {
+    cout << "Prediction: '" << prediction << "', Actual: '" << actual << "', " << hit_probability << "\t" << " | Distribution: ";
     for (auto pair : base_distribution) {
         cout << "('" << pair.first << "', " << pair.second << ") ";
     }
@@ -221,6 +223,7 @@ void printOptions() {
     cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
     cout << "\t\t\t\to - oldest" << endl;
     cout << "\t\t\t\tn - newer" << endl;
+    cout << "\t\t\t\tm - most common prediction among all pointers" << endl;
     cout << "\t-t T\t\tThreshold for copy pointer switch (default: n:0.50):" << endl;
     cout << "\t\t\t\tn:X - static probability below X" << endl;
     cout << "\t\t\t\tf:X - number of successive fails above X" << endl; //! temos de ver que o numero faz sentido

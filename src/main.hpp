@@ -4,7 +4,7 @@
 #include <map>
 
 
-void outputProbabilityDistribution(char prediction, double hit_probability, std::map<char, double> base_distribution);
+void outputProbabilityDistribution(char prediction, char actual, double hit_probability, std::map<char, double> base_distribution);
 
 // Options
 void printUsage(char* prog_name);
