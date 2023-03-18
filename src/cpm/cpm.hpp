@@ -111,8 +111,6 @@ public:
 
 class CopyModel {
 
-    friend MostCommonCopyPointerManager;
-
     int k;
     double alpha;
     ReadingStrategy* reading_strategy;
@@ -126,17 +124,18 @@ class CopyModel {
     std::string current_pattern;
     size_t copy_position = -1;
     std::string copy_pattern;
-    bool first_prediction = true;
 
 public:
     CopyModel(int k, double alpha, ReadingStrategy* rs, CopyPointerThreshold* pt, CopyPointerManager* pm, BaseDistribution* bd) : k(k), alpha(alpha), reading_strategy(rs), pointer_threshold(pt), pointer_manager(pm), base_distribution(bd) {}
     bool registerPattern();
+    bool predictionSetup(bool);
     bool predict();
     void advance();
     void firstPass(std::string);
     bool eof();
     int countOf(char);
     void guess();
+    double progress();
     
     void initializeWithMostFrequent();
 

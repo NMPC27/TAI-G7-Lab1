@@ -20,12 +20,13 @@ int main(int argc, char** argv) {
     int k = 4;
     double alpha = 0.1;
     bool verbose = false;
+    bool progress = false;
     ReadingStrategy* reading_strategy = nullptr;
     CopyPointerThreshold* pointer_threshold = nullptr;
     CopyPointerManager* pointer_manager = nullptr;
     BaseDistribution* base_distribution = nullptr;
 
-    while ((c = getopt(argc, argv, "hvbk:a:p:r:t:")) != -1){
+    while ((c = getopt(argc, argv, "xhvbk:a:p:r:t:")) != -1){
         switch(c){
             case 'h':
                 printUsage(argv[0]);
@@ -108,7 +109,9 @@ int main(int argc, char** argv) {
                     }
                 }
                 break;                
-
+            case 'x':
+                progress = true;
+                break;
             case '?':
                 printUsage(argv[0]);
                 return 1;
@@ -145,10 +148,11 @@ int main(int argc, char** argv) {
 
     model.initializeWithMostFrequent();
     while (!model.eof()) {
-        bool exists = model.registerPattern();
+        bool pattern_has_past = model.registerPattern();
+        bool can_predict = model.predictionSetup(pattern_has_past);
 
-        int output_color_condition = exists ? 1 : 0;
-        if (exists) {
+        int output_color_condition = can_predict ? 1 : 0;
+        if (can_predict) {
             bool hit = model.predict();
             output_color_condition += hit ? 1 : 0;
         // TODO: should we perform guesses like this? or "predict"?
@@ -178,6 +182,9 @@ int main(int argc, char** argv) {
             cout << output_color;
             outputProbabilityDistribution(model.prediction, model.actual, model.hit_probability, model.probability_distribution);
             cout << "\e[0m";
+        }
+        else if (progress) {
+            printf("Progress: %3f%%\r", model.progress() * 100);
         }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }
@@ -214,6 +221,7 @@ void printOptions() {
     cout << "Options:" << endl;
     cout << "\t-h\t\tShow this help message" << endl;
     cout << "\t-v\t\tVerbose output (output probability distribution at each encoding step)" << endl;
+    cout << "\t-x\t\tPrint the progress while reading the file. No effect if verbose (-v) is active" << endl;
     cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
     cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
     cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: f):" << endl;

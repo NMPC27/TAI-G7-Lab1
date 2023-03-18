@@ -177,37 +177,43 @@ void CopyModel::advance() {
     
 }
 
-bool CopyModel::predict() {
-    if (first_prediction) {
-        // The copy_pointer_index is initialized at 0. Therefore, the copy_position should be the only other pointer that doesn't point to the current position
-        copy_position = pointer_manager->getCopyPointer(current_pattern);
-        copy_pattern = current_pattern;
-        first_prediction = false;
-    }
-
-    prediction = reading_strategy->at(copy_position + 1);
-    actual = reading_strategy->at(current_position + 1);
-
+// Returns true when able to predict
+bool CopyModel::predictionSetup(bool pattern_has_past) {
 
     hit_probability = calculateProbability(
         pointer_manager->getHits(current_pattern),
         pointer_manager->getMisses(current_pattern));
 
-    bool hit = prediction == actual;
+    bool can_predict = copy_position != current_position;
 
-    pointer_manager->reportPrediction(current_pattern, hit);
-
+    if (!can_predict && pattern_has_past) {
+        // The copy_pointer_index is initialized at 0. Therefore, the copy_position should be the only other pointer that doesn't point to the current position
+        copy_position = pointer_manager->getCopyPointer(current_pattern);
+        copy_pattern = current_pattern;
+    }
     // Check whether copy pointer should be changed
-    if (pointer_threshold->surpassedThreshold(hit_probability)) {
+    else if (pointer_threshold->surpassedThreshold(hit_probability)) {
 
         pointer_manager->repositionCopyPointer(copy_pattern, reading_strategy);
         // Change copy pointer to a new one, this one being from the current pattern
-        copy_position = pointer_manager->getCopyPointer(copy_pattern);
         copy_pattern = current_pattern;
+        copy_position = pointer_manager->getCopyPointer(current_pattern);
 
         pointer_manager->reset();
         pointer_threshold->reset();
     }
+
+    return copy_position != current_position;
+}
+
+bool CopyModel::predict() {
+
+    prediction = reading_strategy->at(copy_position + 1);
+    actual = reading_strategy->at(current_position + 1);
+
+    bool hit = prediction == actual;
+
+    pointer_manager->reportPrediction(current_pattern, hit);
 
     // Update internal probability distribution
     setRemainderProbabilities(prediction, 1.0 - hit_probability);
@@ -261,6 +267,9 @@ void CopyModel::setRemainderProbabilities(char exception, double probability_to_
             probability_distribution[pair.first] = probability_to_distribute * base_distribution->distribution[pair.first] / base_remainder_total;
 }
 
+double CopyModel::progress() {
+    return (double) current_position / reading_strategy->endOfStream();
+}
 
 void CopyModel::guess() {
 
