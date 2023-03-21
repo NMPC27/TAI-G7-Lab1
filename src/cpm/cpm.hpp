@@ -3,12 +3,6 @@
 #include <map>
 #include "parser.hpp"
 
-struct PatternInfo {
-    std::vector<size_t> pointers;
-    int copy_pointer_index;     // Pattern's last symbol
-    int hits;
-    int misses;
-};
 
 class CopyPointerThreshold {
 public:
@@ -37,20 +31,66 @@ public:
     void reset();
 };
 
+class SuccessFailsCopyPointerThreshold : public CopyPointerThreshold {
+
+    double previous_hit_probability = -1;
+    int fails_count = 0;
+    int fails_threshold;
+
+public:
+    SuccessFailsCopyPointerThreshold(double dt) : fails_threshold(dt) {}
+    bool surpassedThreshold(double hit_probability);
+    void reset();
+};
+
+
+struct SimplePointerInfo {
+    std::vector<size_t> pointers;
+    int copy_pointer_index;     // Pattern's last symbol
+};
+
 class CopyPointerManager {
 public:
-    virtual int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer) = 0;
+    virtual int getCopyPointer(std::string) = 0;
+    virtual void repositionCopyPointer(std::string, ReadingStrategy*) = 0;
+    virtual bool registerCopyPointer(std::string, size_t) = 0;
+    virtual void reportPrediction(std::string, bool) = 0;
+    virtual void reset() = 0;
+    virtual int getHits(std::string) = 0;
+    virtual int getMisses(std::string) = 0;
 };
 
-class RecentCopyPointerManager : public CopyPointerManager {
+class SimpleCopyPointerManager : public CopyPointerManager {
+
+protected:
+    std::map<std::string, SimplePointerInfo> pointer_map;
+    int hits = 0;
+    int misses = 0;
+
 public:
-    int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+    int getCopyPointer(std::string);
+    bool registerCopyPointer(std::string, size_t);
+    void reportPrediction(std::string, bool);
+    void reset();
+    int getHits(std::string);
+    int getMisses(std::string);
 };
 
-class NextOldestCopyPointerManager : public CopyPointerManager {
+class MostCommonCopyPointerManager : public SimpleCopyPointerManager {
 public:
-    int newCopyPointer(std::vector<size_t> copy_pointers, int current_copy_pointer);
+    void repositionCopyPointer(std::string, ReadingStrategy*);    
 };
+
+class RecentCopyPointerManager : public SimpleCopyPointerManager {
+public:
+    void repositionCopyPointer(std::string, ReadingStrategy*);
+};
+
+class NextOldestCopyPointerManager : public SimpleCopyPointerManager {
+public:
+    void repositionCopyPointer(std::string, ReadingStrategy*);
+};
+
 
 class BaseDistribution {
 public:
@@ -68,6 +108,7 @@ public:
     void setBaseDistribution(std::map<char, int> histogram);
 };
 
+
 class CopyModel {
 
     int k;
@@ -78,21 +119,23 @@ class CopyModel {
     BaseDistribution* base_distribution;
 
     std::map<char, int> alphabet_counts;
-    std::map<std::string, PatternInfo> pointer_map;
     
-    size_t current_position = 0;
+    size_t current_position = -1;
     std::string current_pattern;
     size_t copy_position = -1;
     std::string copy_pattern;
 
 public:
     CopyModel(int k, double alpha, ReadingStrategy* rs, CopyPointerThreshold* pt, CopyPointerManager* pm, BaseDistribution* bd) : k(k), alpha(alpha), reading_strategy(rs), pointer_threshold(pt), pointer_manager(pm), base_distribution(bd) {}
-    void registerPattern();
+    bool registerPattern();
+    bool predictionSetup(bool);
     bool predict();
     void advance();
     void firstPass(std::string);
     bool eof();
     int countOf(char);
+    void guess();
+    double progress();
     
     void initializeWithMostFrequent();
 
@@ -103,7 +146,7 @@ public:
     char actual = '\0';
 
 private:
-    double calculateProbability();
+    double calculateProbability(int, int);
     void setRemainderProbabilities(char, double);
 
 };

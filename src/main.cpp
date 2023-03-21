@@ -6,7 +6,8 @@
 #include <list>
 #include <vector>
 #include <cmath>
-#include "unistd.h"
+#include <sys/stat.h>
+#include <unistd.h>
 #include "cpm/cpm.hpp"
 #include "main.hpp"
 
@@ -19,12 +20,13 @@ int main(int argc, char** argv) {
     int k = 4;
     double alpha = 0.1;
     bool verbose = false;
+    bool progress = false;
     ReadingStrategy* reading_strategy = nullptr;
     CopyPointerThreshold* pointer_threshold = nullptr;
     CopyPointerManager* pointer_manager = nullptr;
     BaseDistribution* base_distribution = nullptr;
 
-    while ((c = getopt(argc, argv, "hvbk:a:p:r:t:")) != -1){
+    while ((c = getopt(argc, argv, "xhvbk:a:p:r:t:")) != -1){
         switch(c){
             case 'h':
                 printUsage(argv[0]);
@@ -64,6 +66,8 @@ int main(int argc, char** argv) {
                     pointer_manager = new NextOldestCopyPointerManager();
                 } else if (optarg[0] == 'n') {
                     pointer_manager = new RecentCopyPointerManager();
+                } else if (optarg[0] == 'm') {
+                    pointer_manager = new MostCommonCopyPointerManager();
                 } else {
                     cout << "Error: invalid option for '-r' (" << optarg[0] << ")" << endl;
                     return 1;
@@ -87,10 +91,15 @@ int main(int argc, char** argv) {
                         double threshold_value = stof(value);
                         pointer_threshold = new StaticCopyPointerThreshold(threshold_value);
                     } else if (opt == "f") {
-                        //int threshold_value = stoi(value);
-                        //pointer_threshold = "number_of_successive_fails";
-                        cout << "Error: '-t f:X' option currently not supported" << endl;
-                        return 1;
+                        int threshold_value = stoi(value);
+                        if (threshold_value > 0){
+                            pointer_threshold = new SuccessFailsCopyPointerThreshold(threshold_value);
+                        }else{
+                            cout << "Error: invalid option for '-t f:X' (" << optarg << ")" << endl;
+                            return 1;
+                        }
+                        //cout << "Error: '-t f:X' option currently not supported" << endl;
+                        
                     } else if (opt == "c") {
                         double threshold_value = stof(value);
                         pointer_threshold = new DerivativeCopyPointerThreshold(threshold_value);
@@ -100,7 +109,9 @@ int main(int argc, char** argv) {
                     }
                 }
                 break;                
-
+            case 'x':
+                progress = true;
+                break;
             case '?':
                 printUsage(argv[0]);
                 return 1;
@@ -116,25 +127,65 @@ int main(int argc, char** argv) {
     // Defaults
     if (reading_strategy == nullptr) reading_strategy = new InMemoryReadingStrategy();
     if (pointer_threshold == nullptr) pointer_threshold = new StaticCopyPointerThreshold(0.5);
+    if (pointer_threshold == nullptr) pointer_threshold = new SuccessFailsCopyPointerThreshold(3);
     if (pointer_manager == nullptr) pointer_manager = new NextOldestCopyPointerManager();
-    if (base_distribution == nullptr) base_distribution = new UniformDistribution();
+    if (base_distribution == nullptr) base_distribution = new FrequencyDistribution();
 
     CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
 
-    string fileName = string(argv[optind]);
-    model.firstPass(fileName);
+    string file_name = string(argv[optind]);
+
+    struct stat file_status;
+    stat(file_name.c_str(), &file_status);
+    if (errno == ENOENT) {
+        cout << "Error: file '" << file_name << "' doesn't exist!" << endl;
+        return 1;
+    }
+
+    model.firstPass(file_name);
 
     map<char, double> information_sums;
 
     model.initializeWithMostFrequent();
     while (!model.eof()) {
-        model.registerPattern();
-        bool hit = model.predict();
+        bool pattern_has_past = model.registerPattern();
+        bool can_predict = model.predictionSetup(pattern_has_past);
+
+        int output_color_condition = can_predict ? 1 : 0;
+        if (can_predict) {
+            bool hit = model.predict();
+            output_color_condition += hit ? 1 : 0;
+        // TODO: should we perform guesses like this? or "predict"?
+        } else {
+            model.guess();
+        }
         model.advance();
 
         // The probability distribution that the model provides doesn't account for whether or not the current prediction was a success,
         // as that would incorporate information from the future which would not be known to the decoder.
-        if (verbose) outputProbabilityDistribution(model.prediction, model.hit_probability, model.probability_distribution);
+        if (verbose) {
+            string output_color;
+            switch (output_color_condition) {
+                // New pattern, doesn't exist
+                case 0:
+                    output_color = "\e[0;33m";
+                    break;
+                // Pattern exists, but no hit
+                case 1:
+                    output_color = "\e[0;31m";
+                    break;
+                // Pattern exists, with hit
+                case 2:
+                    output_color = "\e[0;32m";
+                    break;
+            }
+            cout << output_color;
+            outputProbabilityDistribution(model.prediction, model.actual, model.hit_probability, model.probability_distribution);
+            cout << "\e[0m";
+        }
+        else if (progress) {
+            printf("Progress: %3f%%\r", model.progress() * 100);
+        }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }
 
@@ -154,8 +205,8 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void outputProbabilityDistribution(char prediction, double hit_probability, map<char, double> base_distribution) {
-    cout << "Prediction: '" << prediction << "', " << hit_probability << " | Distribution: ";
+void outputProbabilityDistribution(char prediction, char actual, double hit_probability, map<char, double> base_distribution) {
+    cout << "Prediction: '" << prediction << "', Actual: '" << actual << "', " << hit_probability << "\t" << " | Distribution: ";
     for (auto pair : base_distribution) {
         cout << "('" << pair.first << "', " << pair.second << ") ";
     }
@@ -170,6 +221,7 @@ void printOptions() {
     cout << "Options:" << endl;
     cout << "\t-h\t\tShow this help message" << endl;
     cout << "\t-v\t\tVerbose output (output probability distribution at each encoding step)" << endl;
+    cout << "\t-x\t\tPrint the progress while reading the file. No effect if verbose (-v) is active" << endl;
     cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
     cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
     cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: f):" << endl;
@@ -179,6 +231,7 @@ void printOptions() {
     cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
     cout << "\t\t\t\to - oldest" << endl;
     cout << "\t\t\t\tn - newer" << endl;
+    cout << "\t\t\t\tm - most common prediction among all pointers" << endl;
     cout << "\t-t T\t\tThreshold for copy pointer switch (default: n:0.50):" << endl;
     cout << "\t\t\t\tn:X - static probability below X" << endl;
     cout << "\t\t\t\tf:X - number of successive fails above X" << endl; //! temos de ver que o numero faz sentido
