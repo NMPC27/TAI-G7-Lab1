@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     int c;
     int k = 4;
     double alpha = 0.1;
-    enum VerboseMode{human, machine, progress} verbose_mode;
+    enum VerboseMode{human, machine, progress, none} verbose_mode = VerboseMode::none;
     ReadingStrategy* reading_strategy = nullptr;
     CopyPointerThreshold* pointer_threshold = nullptr;
     CopyPointerManager* pointer_manager = nullptr;
