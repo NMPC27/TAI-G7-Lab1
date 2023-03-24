@@ -19,14 +19,13 @@ int main(int argc, char** argv) {
     int c;
     int k = 4;
     double alpha = 0.1;
-    bool verbose = false;
-    bool progress = false;
+    enum VerboseMode{human, machine, progress} verbose_mode;
     ReadingStrategy* reading_strategy = nullptr;
     CopyPointerThreshold* pointer_threshold = nullptr;
     CopyPointerManager* pointer_manager = nullptr;
     BaseDistribution* base_distribution = nullptr;
 
-    while ((c = getopt(argc, argv, "xhvbk:a:p:r:t:")) != -1){
+    while ((c = getopt(argc, argv, "hv:bk:a:p:r:t:")) != -1){
         switch(c){
             case 'h':
                 printUsage(argv[0]);
@@ -34,9 +33,22 @@ int main(int argc, char** argv) {
                 return 0;
 
             case 'v':
-                verbose = true;
+                switch (optarg[0]) {
+                    case 'h':
+                        verbose_mode = VerboseMode::human;
+                        break;
+                    case 'm':
+                        verbose_mode = VerboseMode::machine;
+                        break;
+                    case 'p':
+                        verbose_mode = VerboseMode::progress;
+                        break;
+                    default:
+                        cout << "Error: invalid option for '-v' (" << optarg[0] << ")" << endl;
+                        return 1;
+                }
                 break;
-
+            
             case 'k':
                 k = stoi(optarg);
                 break;
@@ -109,9 +121,7 @@ int main(int argc, char** argv) {
                     }
                 }
                 break;                
-            case 'x':
-                progress = true;
-                break;
+
             case '?':
                 printUsage(argv[0]);
                 return 1;
@@ -147,6 +157,10 @@ int main(int argc, char** argv) {
     map<char, double> information_sums;
 
     model.initializeWithMostFrequent();
+
+    if (verbose_mode == VerboseMode::machine)
+        outputProbabilityDistributionCSVheader();
+
     while (!model.eof()) {
         bool pattern_has_past = model.registerPattern();
         bool can_predict = model.predictionSetup(pattern_has_past);
@@ -163,28 +177,35 @@ int main(int argc, char** argv) {
 
         // The probability distribution that the model provides doesn't account for whether or not the current prediction was a success,
         // as that would incorporate information from the future which would not be known to the decoder.
-        if (verbose) {
-            string output_color;
-            switch (output_color_condition) {
-                // New pattern, doesn't exist
-                case 0:
-                    output_color = "\e[0;33m";
-                    break;
-                // Pattern exists, but no hit
-                case 1:
-                    output_color = "\e[0;31m";
-                    break;
-                // Pattern exists, with hit
-                case 2:
-                    output_color = "\e[0;32m";
-                    break;
-            }
-            cout << output_color;
-            outputProbabilityDistribution(model.prediction, model.actual, model.hit_probability, model.probability_distribution);
-            cout << "\e[0m";
-        }
-        else if (progress) {
-            printf("Progress: %3f%%\r", model.progress() * 100);
+        switch (verbose_mode) {
+            case VerboseMode::human:
+                {
+                    string output_color;
+                    switch (output_color_condition) {
+                        // New pattern, doesn't exist
+                        case 0:
+                            output_color = "\e[0;33m";
+                            break;
+                        // Pattern exists, but no hit
+                        case 1:
+                            output_color = "\e[0;31m";
+                            break;
+                        // Pattern exists, with hit
+                        case 2:
+                            output_color = "\e[0;32m";
+                            break;
+                    }
+                    cout << output_color;
+                    outputProbabilityDistributionHuman(model.prediction, model.actual, model.hit_probability, model.probability_distribution);
+                    cout << "\e[0m";
+                }
+                break;
+            case VerboseMode::machine:
+                outputProbabilityDistributionCSVbody(model.prediction, model.actual, model.hit_probability, model.probability_distribution);
+                break;
+            case VerboseMode::progress:
+                printf("Progress: %3f%%\r", model.progress() * 100);
+                break;
         }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }
@@ -211,10 +232,22 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-void outputProbabilityDistribution(char prediction, char actual, double hit_probability, map<char, double> base_distribution) {
+void outputProbabilityDistributionHuman(char prediction, char actual, double hit_probability, map<char, double> base_distribution) {
     cout << "Prediction: '" << prediction << "', Actual: '" << actual << "', " << hit_probability << "\t" << " | Distribution: ";
     for (auto pair : base_distribution) {
         cout << "('" << pair.first << "', " << pair.second << ") ";
+    }
+    cout << endl;
+}
+
+void outputProbabilityDistributionCSVheader() {
+    cout << "Prediction, Actual, Hit probability, Distribution" << endl;
+}
+
+void outputProbabilityDistributionCSVbody(char prediction, char actual, double hit_probability, map<char, double> distribution) {
+    cout << prediction << "," << actual << "," << hit_probability << ",";
+    for (auto pair : distribution) {
+        cout << pair.first << ":" << pair.second << ":";
     }
     cout << endl;
 }
@@ -226,8 +259,10 @@ void printUsage(char* prog_name) {
 void printOptions() {
     cout << "Options:" << endl;
     cout << "\t-h\t\tShow this help message" << endl;
-    cout << "\t-v\t\tVerbose output (output probability distribution at each encoding step)" << endl;
-    cout << "\t-x\t\tPrint the progress while reading the file. No effect if verbose (-v) is active" << endl;
+    cout << "\t-v V\t\tAdditional output (verbose modes output the probability distribution at each encoding step):" << endl;
+    cout << "\t\t\t\th - Human-readable verbose output, color-coded depending on whether a hit/miss/guess occurred" << endl;
+    cout << "\t\t\t\tm - Machine-readable verbose output, without color-coding and minimal flair (CSV format with header)" << endl;
+    cout << "\t\t\t\tp - Print the progress of processing the sequence" << endl;
     cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
     cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
     cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: f):" << endl;
