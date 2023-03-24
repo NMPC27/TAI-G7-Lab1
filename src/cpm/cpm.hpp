@@ -114,7 +114,8 @@ class CopyModel {
     int k;
     double alpha;
     ReadingStrategy* reading_strategy;
-    CopyPointerThreshold* pointer_threshold;
+    CopyPointerThreshold** pointer_threshold;
+    int pointer_threshold_number;
     CopyPointerManager* pointer_manager;
     BaseDistribution* base_distribution;
 
@@ -126,7 +127,8 @@ class CopyModel {
     std::string copy_pattern;
 
 public:
-    CopyModel(int k, double alpha, ReadingStrategy* rs, CopyPointerThreshold* pt, CopyPointerManager* pm, BaseDistribution* bd) : k(k), alpha(alpha), reading_strategy(rs), pointer_threshold(pt), pointer_manager(pm), base_distribution(bd) {}
+    CopyModel(int k, double alpha, ReadingStrategy* rs, CopyPointerThreshold** pt, int ptn, CopyPointerManager* pm, BaseDistribution* bd) : 
+        k(k), alpha(alpha), reading_strategy(rs), pointer_threshold(pt), pointer_threshold_number(ptn), pointer_manager(pm), base_distribution(bd) {}
     bool registerPattern();
     bool predictionSetup(bool);
     bool predict();
@@ -148,5 +150,6 @@ public:
 private:
     double calculateProbability(int, int);
     void setRemainderProbabilities(char, double);
+    bool surpassedAnyThreshold(double);
 
 };

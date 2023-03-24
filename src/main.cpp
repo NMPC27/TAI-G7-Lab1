@@ -13,6 +13,12 @@
 
 using namespace std;
 
+/** @brief Maximum number of unique copy pointers */
+#define POINTER_THRESHOLD_MAX_NUMBER 3
+#define POINTER_THRESHOLD_MASK_STATIC 1
+#define POINTER_THRESHOLD_MASK_DERIVATIVE 2
+#define POINTER_THRESHOLD_MASK_SUCCESSIVE_FAILS 4
+
 
 int main(int argc, char** argv) {
 
@@ -21,7 +27,9 @@ int main(int argc, char** argv) {
     double alpha = 0.1;
     enum VerboseMode{human, machine, progress, none} verbose_mode = VerboseMode::none;
     ReadingStrategy* reading_strategy = nullptr;
-    CopyPointerThreshold* pointer_threshold = nullptr;
+    CopyPointerThreshold* pointer_thresholds[POINTER_THRESHOLD_MAX_NUMBER];
+    int pointer_threshold_number = 0;
+    int pointer_threshold_mask = 0;
     CopyPointerManager* pointer_manager = nullptr;
     BaseDistribution* base_distribution = nullptr;
 
@@ -84,7 +92,7 @@ int main(int argc, char** argv) {
             case 't':
                 {
                     string optarg_string = string(optarg);
-
+                    cout << optarg_string << endl;
                     int pos = optarg_string.find(":");
                     if (pos == -1) {
                         cout << "Error: invalid option for '-t' (" << optarg << ")" << endl;
@@ -95,12 +103,24 @@ int main(int argc, char** argv) {
                     string value = optarg_string.substr(pos+1, optarg_string.length());
 
                     if (opt == "n") {
+                        if (pointer_threshold_mask & POINTER_THRESHOLD_MASK_STATIC) {
+                            cout << "Error: mode '" << opt << "' for option '-t' was specified more than once (repeated value '" << optarg << "')" << endl;
+                            return 1;
+                        }
                         double threshold_value = stof(value);
-                        pointer_threshold = new StaticCopyPointerThreshold(threshold_value);
+                        pointer_thresholds[pointer_threshold_number] = new StaticCopyPointerThreshold(threshold_value);
+                        pointer_threshold_number++;
+                        pointer_threshold_mask |= POINTER_THRESHOLD_MASK_STATIC;
                     } else if (opt == "f") {
+                        if (pointer_threshold_mask & POINTER_THRESHOLD_MASK_SUCCESSIVE_FAILS) {
+                            cout << "Error: mode '" << opt << "' for option '-t' was specified more than once (repeated value '" << optarg << "')" << endl;
+                            return 1;
+                        }
                         int threshold_value = stoi(value);
                         if (threshold_value > 0){
-                            pointer_threshold = new SuccessFailsCopyPointerThreshold(threshold_value);
+                            pointer_thresholds[pointer_threshold_number] = new SuccessFailsCopyPointerThreshold(threshold_value);
+                            pointer_threshold_number++;
+                            pointer_threshold_mask |= POINTER_THRESHOLD_MASK_SUCCESSIVE_FAILS;
                         }else{
                             cout << "Error: invalid option for '-t f:X' (" << optarg << ")" << endl;
                             return 1;
@@ -108,8 +128,14 @@ int main(int argc, char** argv) {
                         //cout << "Error: '-t f:X' option currently not supported" << endl;
                         
                     } else if (opt == "c") {
+                        if (pointer_threshold_mask & POINTER_THRESHOLD_MASK_DERIVATIVE) {
+                            cout << "Error: mode '" << opt << "' for option '-t' was specified more than once (repeated value '" << optarg << "')" << endl;
+                            return 1;
+                        }
                         double threshold_value = stof(value);
-                        pointer_threshold = new DerivativeCopyPointerThreshold(threshold_value);
+                        pointer_thresholds[pointer_threshold_number] = new DerivativeCopyPointerThreshold(threshold_value);
+                        pointer_threshold_number++;
+                        pointer_threshold_mask |= POINTER_THRESHOLD_MASK_DERIVATIVE;
                     } else {
                         cout << "Error: invalid option for '-t' (" << optarg << ")" << endl;
                         return 1;
@@ -131,12 +157,14 @@ int main(int argc, char** argv) {
 
     // Defaults
     if (reading_strategy == nullptr) reading_strategy = new InMemoryReadingStrategy();
-    if (pointer_threshold == nullptr) pointer_threshold = new StaticCopyPointerThreshold(0.5);
-    if (pointer_threshold == nullptr) pointer_threshold = new SuccessFailsCopyPointerThreshold(3);
+    if (pointer_threshold_number == 0) {
+        pointer_thresholds[pointer_threshold_number] = new StaticCopyPointerThreshold(0.5);
+        pointer_threshold_number++;
+    }
     if (pointer_manager == nullptr) pointer_manager = new NextOldestCopyPointerManager();
     if (base_distribution == nullptr) base_distribution = new FrequencyDistribution();
 
-    CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
+    CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_thresholds, pointer_threshold_number, pointer_manager, base_distribution);
 
     string file_name = string(argv[optind]);
 
@@ -206,7 +234,8 @@ int main(int argc, char** argv) {
     }
 
     delete reading_strategy;
-    delete pointer_threshold;
+    for (int i = 0; i < pointer_threshold_number; i++)
+        delete pointer_thresholds[i];
     delete pointer_manager;
     delete base_distribution;
 
@@ -216,7 +245,6 @@ int main(int argc, char** argv) {
         cout << pair.first << ": " << pair.second / model.countOf(pair.first) << " bits" << endl;
         information_sum += pair.second;
     }
-
 
     int sum=0;
     for(std::map<char,double>::iterator it = model.probability_distribution.begin(); it != model.probability_distribution.end(); ++it) {
@@ -274,6 +302,7 @@ void printOptions() {
     cout << "\t\t\t\tc:X - absolute value of the negative derivative of the prediction probability above X" << endl;
 }
 
+// TODO: remove both
 void printAlphabet(map<char, double> pointer_map) {
 
     for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
