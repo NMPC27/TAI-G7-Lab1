@@ -222,7 +222,8 @@ int main(int argc, char** argv) {
     for(std::map<char,double>::iterator it = model.probability_distribution.begin(); it != model.probability_distribution.end(); ++it) {
         sum+=model.countOf(it->first);
     }
-    cout << "Total amount of information: " << information_sum << " bits | media: " << information_sum/sum << endl;
+    cout << "Mean amount of information of a symbol: " << information_sum/sum << " bits" << endl;
+    cout << "Total amount of information: " << information_sum << " bits" << endl;
 
     return 0;
 }
