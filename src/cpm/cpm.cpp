@@ -135,6 +135,6 @@ void CopyModel::guess() {
 bool CopyModel::surpassedAnyThreshold(double hit_probability) {
     bool res = true;
     for (int i = 0; i < pointer_threshold_number; i++)
-        res = res and pointer_threshold[i]->surpassedThreshold(hit_probability);
+        res = res or pointer_threshold[i]->surpassedThreshold(hit_probability);
     return res;
 }
