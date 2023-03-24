@@ -68,11 +68,6 @@ int main(int argc, char** argv) {
                 }
                 break;
 
-            case 'b':
-                cout << "Error: '-b' option currently not supported" << endl;
-                return 1;
-                break;
-
             case 'r':
                 if (optarg[0] == 'o') {
                     pointer_manager = new NextOldestCopyPointerManager();
@@ -268,7 +263,6 @@ void printOptions() {
     cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: f):" << endl;
     cout << "\t\t\t\tu - uniform distribution" << endl;
     cout << "\t\t\t\tf - distribution based on the symbols' relative frequencies" << endl;
-    cout << "\t-b\t\tRead file in binary" << endl;
     cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
     cout << "\t\t\t\to - oldest" << endl;
     cout << "\t\t\t\tn - newer" << endl;
