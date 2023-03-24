@@ -1,4 +1,6 @@
 #include <vector>
+#ifndef PARSER_HPP
+#define PARSER_HPP
 
 class ReadingStrategy {
 
@@ -21,3 +23,5 @@ public:
     void clean();
 
 };
+
+#endif
