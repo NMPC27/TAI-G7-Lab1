@@ -1,3 +1,17 @@
-// Options
-void printUsage(char* prog_name);
-void printOptions();
+#include <vector>
+#include <map>
+#include <string>
+#include <list>
+
+
+void firstPass(std::string fileName, int k);
+
+void cpm_gen(std::string ini_str, int k, int num_char);
+
+void printMap(std::map<std::string, std::vector<char>> map);
+
+void printAlphabet(std::map<char, int> map);
+
+
+
+
