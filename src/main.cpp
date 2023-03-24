@@ -200,7 +200,13 @@ int main(int argc, char** argv) {
         cout << pair.first << ": " << pair.second / model.countOf(pair.first) << " bits" << endl;
         information_sum += pair.second;
     }
-    cout << "Total amount of information: " << information_sum << " bits" << endl;
+
+
+    int sum=0;
+    for(std::map<char,double>::iterator it = model.probability_distribution.begin(); it != model.probability_distribution.end(); ++it) {
+        sum+=model.countOf(it->first);
+    }
+    cout << "Total amount of information: " << information_sum << " bits | media: " << information_sum/sum << endl;
 
     return 0;
 }
