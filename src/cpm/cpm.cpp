@@ -41,7 +41,7 @@ bool CopyModel::predictionSetup(bool pattern_has_past) {
         copy_pattern = current_pattern;
     }
     // Check whether copy pointer should be changed
-    else if (pointer_threshold->surpassedThreshold(hit_probability)) {
+    else if (surpassedAnyThreshold(hit_probability)) {
 
         pointer_manager->repositionCopyPointer(copy_pattern, reading_strategy);
         // Change copy pointer to a new one, this one being from the current pattern
@@ -49,7 +49,8 @@ bool CopyModel::predictionSetup(bool pattern_has_past) {
         copy_position = pointer_manager->getCopyPointer(current_pattern);
 
         pointer_manager->reset();
-        pointer_threshold->reset();
+        for (int i = 0; i < pointer_threshold_number; i++)
+            pointer_threshold[i]->reset();
     }
 
     return copy_position != current_position;
@@ -129,4 +130,11 @@ void CopyModel::guess() {
     hit_probability = 0;
     // TODO: maybe we shouldn't copy like this! this allows for editing the base distribution from outside
     probability_distribution = base_distribution->distribution;
+}
+
+bool CopyModel::surpassedAnyThreshold(double hit_probability) {
+    bool res = true;
+    for (int i = 0; i < pointer_threshold_number; i++)
+        res = res and pointer_threshold[i]->surpassedThreshold(hit_probability);
+    return res;
 }
