@@ -25,30 +25,18 @@ int main(int argc, char** argv) {
     
 
     string ini_str="";
-    double alpha = 0.1;
     string train_file="";
     int num_char = 0;
 
-    ///////////////////
-    ini_str = "As the";
-    alpha = 1;
-    train_file = "othello.txt";
-    num_char = 2000;
-
-
-    //////////////////
-
-    /*
-    while ((c = getopt(argc, argv, "hs:a:f:n:")) != -1){
+    
+    while ((c = getopt(argc, argv, "hs:f:n:")) != -1){
         switch(c){
             case 'h':
-                printUsage(argv[0]);
+                cout << "Usage: " << argv[0] << " -s 'string inicial' -f train_file.txt -n num_caracteres_a_gerar" << endl;
+                cout << "Example: " << argv[0] << " -s 'As the' -f othello.txt -n 2000" << endl;
                 return 0;
             case 's': 
                 ini_str=optarg;
-                break;
-            case 'a':
-                alpha = stof(optarg);
                 break;
             case 'f': 
                 train_file=optarg;
@@ -58,17 +46,29 @@ int main(int argc, char** argv) {
                 break;
                             
             case '?':
-                cout << "Usage: " << argv[0] << " -s 'string inicial' -a alpha -f train_file.txt -n num_caracteres_a_gerar" << endl;
+                cout << "Usage: " << argv[0] << " -s 'string inicial' -f train_file.txt -n num_caracteres_a_gerar" << endl;
+                cout << "Example: " << argv[0] << " -s 'As the' -f othello.txt -n 2000" << endl;
                 return 1;
         }
     }
-    */
+
+    if (ini_str == "" || train_file == "" || num_char <= 0) {
+        cout << "Usage: " << argv[0] << " -s 'string inicial' -f train_file.txt -n num_caracteres_a_gerar" << endl;
+        cout << "Example: " << argv[0] << " -s 'As the' -f othello.txt -n 2000" << endl;
+        return 1;
+    }
+
+    cout << "String inicial: " << ini_str << endl;
+    cout << "Train file: " << train_file << endl;
+    cout << "Num caracteres a gerar: " << num_char << endl;
+    
 
     firstPass(train_file,ini_str.size());
 
 
     printMap(map_patterns);
-    //printAlphabet(alphabet);
+    cout << endl;
+    printAlphabet(alphabet);
 
     cpm_gen(ini_str,ini_str.size(), num_char);
 
