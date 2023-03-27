@@ -92,7 +92,6 @@ int main(int argc, char** argv) {
             case 't':
                 {
                     string optarg_string = string(optarg);
-                    cout << optarg_string << endl;
                     int pos = optarg_string.find(":");
                     if (pos == -1) {
                         cout << "Error: invalid option for '-t' (" << optarg << ")" << endl;
@@ -192,7 +191,6 @@ int main(int argc, char** argv) {
         if (can_predict) {
             bool hit = model.predict();
             output_color_condition += hit ? 1 : 0;
-        // TODO: should we perform guesses like this? or "predict"?
         } else {
             model.guess();
         }
@@ -300,23 +298,4 @@ void printOptions() {
     cout << "\t\t\t\tn:X - static probability below X" << endl;
     cout << "\t\t\t\tf:X - number of successive fails above X" << endl; //! temos de ver que o numero faz sentido
     cout << "\t\t\t\tc:X - absolute value of the negative derivative of the prediction probability above X" << endl;
-}
-
-// TODO: remove both
-void printAlphabet(map<char, double> pointer_map) {
-
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : " << it->second << endl;
-    }
-}
-
-void printMap(map<string, list<int>> pointer_map) {
-
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : ";
-        for (auto it2 = it->second.begin(); it2 != it->second.end(); it2++) {
-            cout << *it2 << " ";
-        }
-        cout << endl;
-    }
 }
