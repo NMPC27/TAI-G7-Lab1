@@ -234,8 +234,8 @@ void printUsage(string file) {
     cout << "Example: " << file << " -s 'As the' -f othello.txt -n 2000" << endl;
     cout << "Options:" << endl;
     cout << "  -h  help" << endl;
-    cout << "  -t  (alow training himself)" << endl;
-    cout << "  -l  (alow only lower case letters - better for smaller input texts)" << endl;
+    cout << "  -t  (allow training himself)" << endl;
+    cout << "  -l  (allow only lower case letters - better for smaller input texts)" << endl;
 }
 
 
