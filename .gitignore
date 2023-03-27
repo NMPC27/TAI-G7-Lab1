@@ -4,6 +4,7 @@ ignore
 scripts/input/*
 scripts/processed/*
 scripts/images/*
+scripts/*.csv
 report/*
 
 !report/report.pdf
