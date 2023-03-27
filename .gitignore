@@ -2,3 +2,7 @@
 build
 ignore
 scripts/input
+report/*
+
+!report/report.pdf
+!report/report.tex
