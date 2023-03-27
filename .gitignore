@@ -3,9 +3,11 @@ build
 ignore
 scripts/input/*
 scripts/processed/*
+scripts/images/*
 report/*
 
 !report/report.pdf
 !report/report.tex
 !scripts/input/.empty
 !scripts/processed/.empty
+!scripts/images/.empty
