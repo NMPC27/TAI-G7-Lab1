@@ -1,8 +1,11 @@
 .vscode
 build
 ignore
-scripts/input
+scripts/input/*
+scripts/processed/*
 report/*
 
 !report/report.pdf
 !report/report.tex
+!scripts/input/.empty
+!scripts/processed/.empty
