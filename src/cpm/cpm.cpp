@@ -128,7 +128,6 @@ void CopyModel::guess() {
     // Just return the base distribution
     prediction = '\0';
     hit_probability = 0;
-    // TODO: maybe we shouldn't copy like this! this allows for editing the base distribution from outside
     probability_distribution = base_distribution->distribution;
 }
 

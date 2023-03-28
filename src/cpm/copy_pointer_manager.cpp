@@ -63,7 +63,7 @@ void MostCommonCopyPointerManager::repositionCopyPointer(std::string pattern, Re
 
         count = 0;
 
-        // Majority algorithm: first pass (determine most frequent)
+        // First pass: majority algorithm (determine most frequent)
         for (size_t pointer : pointer_candidates) {
             char char_at_pointer = reading_strategy->at(pointer + offset);
 
@@ -77,7 +77,7 @@ void MostCommonCopyPointerManager::repositionCopyPointer(std::string pattern, Re
             }
         }
 
-        // Majority algorithm: second pass (remove all pointers that don't match the most frequent)
+        // Second pass (remove all pointers that don't match the most frequent)
         for (std::list<size_t>::iterator it = pointer_candidates.begin(); it != pointer_candidates.end();) {
             size_t pointer = *it;
             if (reading_strategy->at(pointer + offset) == most_frequent)
