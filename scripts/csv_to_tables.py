@@ -1,6 +1,5 @@
 import os.path
 import subprocess
-import gzip
 from argparse import ArgumentParser
 from typing import List
 from common import parse_processed_name
@@ -12,7 +11,7 @@ Take the final results from the .csv files and output them into a CSV table.
 
 
 def get_results_block(input_file_name: str) -> List[str]:
-    completed_process = subprocess.run(['tail', '-n', '7', input_file_name], capture_output=True)
+    completed_process = subprocess.run(['gzip', '-dc', input_file_name, '|', 'tail', '-n', '7'], capture_output=True)
     return completed_process.stdout.decode().strip().split('\n')
 
 
@@ -25,7 +24,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     separator = '\t'
 
-    with gzip.open(args.output, 'wt') as f:
+    with open(args.output, 'wt') as f:
         f.write('k\talpha\tdistribution\tmanager\tthresholds\tentropy\n')
         for fname in args.file:
             fname_base, _ = os.path.splitext(os.path.basename(fname))
