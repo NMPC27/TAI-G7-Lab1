@@ -88,7 +88,7 @@ void MostCommonCopyPointerManager::repositionCopyPointer(std::string pattern, Re
         offset++;
     }
 
-    size_t pointer_candidate = pointer_candidates.front();
+    size_t pointer_candidate = pointer_candidates.back();
     int i;
     for (i = 0; i < pointer_map[pattern].pointers.size(); i++)
         if (pointer_map[pattern].pointers[i] == pointer_candidate)
