@@ -34,12 +34,12 @@ The second goal of the assignment is to implement a text generator based on the 
 The text generator receives a text as input to train the model, and then follows a similar approach to the one used in the copy model,
 but instead of predicting the next symbol, it uses the probability distribution to generate a random symbol based on these probabilities.
 
-In this report we will first present how the work was organized, in the \ref*{sec:work-organization} section.
-Then, we will present the \ref*{sec:copy-model}, how we implemented it and the results obtained, which we will compare by calculating the entropy of different text examples,
+In this report we will first present how the work was organized, in the \ref{sec:work-organization} section.
+Then, we will present the \ref{sec:copy-model}, how we implemented it and the results obtained, which we will compare by calculating the entropy of different text examples,
 like chry.txt given by the teachers, with different parameters we defined for the model.
-The next section is dedicated to the \ref*{sec:text-generator}, where we will present the implementation and the results obtained for the text generator,
+The next section is dedicated to the \ref{sec:text-generator}, where we will present the implementation and the results obtained for the text generator,
 using different texts as input for training of the generator, as well as diferrent starting points for the generation of text.
-Finally, we will conclude the report in the \ref*{sec:conclusion} section.
+Finally, we will conclude the report in the \ref{sec:conclusion} section.
 
 \section{Work organization}
 \label{sec:work-organization}
@@ -65,26 +65,101 @@ The files chosen for testing are present in the repository\footnote{\url{https:/
 
 \dots
 
-Throughout this section, the different program parameters are detailed, 
-and their effect on the model's performance is studied.
-
-% \subsection{Verbose output}
+Throughout this section, the different program parameters are detailed, and their effect on the model's performance is studied.
 
 \subsection{Pattern size}
 
-When choosing a pointer in the past from which to start copying,
-we need to look for an occurrence of the same $k$-sized pattern as the
-one we are currently on.
-
+When choosing a pointer in the past from which to start copying, we need to look for an occurrence of the same $k$-sized pattern as the one we are currently on.
 Thus, $k$ is one of the parameters that affects program performance, where $k$ is a positive integer.
-On one hand, a lower value of $k$
+
+On one hand, a lower value of $k$ means there will be more occurrences of each pattern, since there will be lesser possible $k$-sized patterns, which will result in more oportunities to copy from the past.
+On the other, a larger $k$ will result in less occurrences for each pattern, which results in more scarce predictions, and thus more overall guesses.
+
+For a given $k$, the number of possible patterns $M$ is equal to the number of permutations of the symbols of alphabet $A$: $M = \vert A \vert ^ k$.
+The results on changing this value will be studied taking this exponential growth into account.
 
 \subsubsection{Results}
 
+\dots
+
 \subsection{Smoothing parameter alpha}
+
+At each coding step, the probability of correctly predicting the current character is given by the formula:
+
+$$
+P(\textnormal{hit}) = \frac{N_h + \alpha}{N_h + N_f + 2\alpha}
+$$
+
+where $N_h$ and $N_f$ are respectively the number of hits and misses, and $\alpha$ is the smoothing parameter.
+The smoothing parameter is used to avoid the model having a probability of 0 when there are no hits or misses, which will happen when no prediction has been made yet, and also avoid assuming with complete certainty (probability of 1) that the prediction will be correct when no fails were made yet, which will result in infinite information in case the prediction fails.
+
+If $\alpha$ is lower, we expect the reported probabilites to be more ``certain'' with a greater possibility of reaching high values.
+If $\alpha$ is greater, the smoothing effect should be more pronounced, producing probability values that hardly increase, which should result in relatively less information when predictions fail but also lesser returns on the correct predictions.
+
+This trade-off between $\alpha$ and the reported information, especially regarding the information spikes that may occur, will be studied in the results.
+
+\subsubsection{Results}
+
+\dots
+
 \subsection{Base probability distribution}
+
+For each symbol in the file, a probability distribution has to be generated according to the prediction probability.
+In case a given prediction fails, we need to distribute the complement of the probability of a correct prediction $1 - P(\textnormal{hit})$ among the other symbols of the alphabet, except the one that we predicted would occur (which has probability $P(\textnormal{hit})$).
+
+The choice of distribution also influences the guesses that are made.
+When a prediction can't be made, the model assumes a distribution for the entirety of the alphabet, which is the same probability distribution as the use used when distributing the complement of the prediction probability.
+
+We developed two simple approaches to distributing the probability: a uniform distribution and a frequency distribution.
+
+The uniform distribution assigns to each symbol a probability equal to:
+
+$$
+\frac{1 - P(\textnormal{hit})}{\vert A \vert - 1}
+$$
+
+On the other hand, the frequency distribution assigns to each symbol $a \in A$ a probability equal to:
+
+$$
+(1 - P(\textnormal{hit})) \times p(a)
+$$
+
+where $p(a)$ is the probability of $a$ in the whole file.
+
+Both distributions are compared especially in their effect on the overall reported information, when $k$ is large and thus more guesses are made, as well as when $\alpha$ is large and the prediction fails should report.
+We assume that, since the frequency distribution models the overall distribution of the symbols, it should provide better results.
+We should note, however, that the file's content may have locality, i.e. select portions in the file where the symbol distribution is skewed.
+Therefore, we don't disregard the possibility that the assumption of the distribution being maintained throughout the file can hurt the model performance as well.
+
+\subsubsection{Results}
+
+\dots
+
 \subsection{Copy pointer repositioning strategy}
+
+Different strategies can be followed when choosing a copy pointer from which to start copying.
+We developed 3 approaches, 2 of which being fairly simplistic:
+\begin{itemize}
+    \item Oldest pointer first: the chosen copy pointer
+    \item Newest pointer first:
+    \item Most common prediction:
+\end{itemize}
+
+\subsubsection{Results}
+
 \subsection{Copy pointer reposition threshold}
+
+\dots
+
+\subsubsection{Results}
+
+\subsection{Verbose output}
+
+As a sidenote, the model offers the possibility of outputting the probability distributions and predicitons at each step, or of presenting the overall progress of processing the input file.
+
+For the modes outputting the probabilities, the output can be in human-readable format, presenting whether the reported probabilites were from a guess or a prediction hit/miss in colored output.
+Alternatively, the output can be presented as comma-separated values with less extraneous characters in machine-readable format, which is useful for data analysis afterwards.
+
 
 \section{Text generator}
 \label{sec:text-generator}
@@ -96,7 +171,7 @@ next characters based on a context phrase.
 It contains two main methods, the firstPass(), that reads the training file and makes an initial pass through the text to calculate the frequencies of the characters.
 This method also makes an context model based on the training file, and the size of the context is defined by the input string. 
 
-The cpm${_}$gen() method uses the context model in the first pass to generate the text.
+The \verb|cpm_gen()| method uses the context model in the first pass to generate the text.
 When we try to generate the next symbol, we read the current context, which is the size of the input string and we check the context model for that context. If we have that context in the model, we get the list of possible next symbols, and their counts. Then, we generate a random value between 0 and the sum of the counts, and we check where that value lands between all the ranges of counts of events of that context. The symbol that is in the range of the random value is the next symbol of the text.
 If we don't have that context in the model, we get the list of all possible symbols in the alphabet, and their distribution, and we generate a random value between 0 and the sum of the distributions, and we check where that value lands between all the ranges of distributions of events of that context. The symbol that is in the range of the random value is the next symbol of the text. 
 
@@ -104,7 +179,7 @@ We also have 2 other input parameters that modify the beavior of the generator. 
 The second parameter is to allow all lowercase characters to be generated, this is done by converting all the characters to lowercase while reading the training file, this parameter provides a better context model without nedding a big training file, but it also makes the text generated to be all lowercase.
 
 
-\subsubsection{Results}
+\subsection{Results}
 
 
 Results for the text generator without -l or -t parameters:

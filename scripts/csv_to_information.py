@@ -1,5 +1,6 @@
 import numpy as np
 import os.path
+import gzip
 from os import stat
 from math import log2
 from argparse import ArgumentParser
@@ -18,7 +19,7 @@ def get_approximate_byte_count(file_name: str) -> int:
 def get_information(file_name: str, max_size: int) -> np.ndarray:
     information_steps: np.ndarray = np.empty((max_size, 1), dtype=np.float32)
 
-    with open(file_name, 'rt') as f:
+    with gzip.open(file_name, 'rt') as f:
         f.readline()    # skip header
         for i, line in enumerate(f):
             line = line[:-1]    # remove newline
@@ -52,7 +53,7 @@ def process_and_save_information_and_entropy(main_file_name: str):
     assert os.path.exists(source_file_path), f'Source file \'{source_file_path}\' doesn\'t exist!'
     assert os.path.exists(results_file_path), f'Source file \'{results_file_path}\' doesn\'t exist!'
     
-    results_file_path_without_extension, _ = os.path.splitext(os.path.basename(results_file_path))
+    (results_file_path_without_extension, _), _ = os.path.splitext(os.path.splitext(os.path.basename(results_file_path)))
     processed_information_file_path = f'./processed/{results_file_path_without_extension}_information.npy'
     processed_entropy_file_path = f'./processed/{results_file_path_without_extension}_entropy.npy'
 
