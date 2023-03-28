@@ -36,54 +36,15 @@ but instead of predicting the next symbol, it uses the probability distribution 
 In this report we will first present how the work was organized, in the \ref{sec:work-organization} section.
 Then, we will present the \ref{sec:copy-model}, how we implemented it and the results obtained, which we will compare by calculating the entropy of different text examples,
 like chry.txt given by the teachers, with different parameters we defined for the model.
-The next section is dedicated to the \ref*{sec:text-generator}, where we will present the implementation and the results obtained for the text generator,
+The next section is dedicated to the \ref{sec:text-generator}, where we will present the implementation and the results obtained for the text generator,
 using different texts as input for training of the generator, as well as diferrent starting points for the generation of text.
-Finally, we will conclude the report in the \ref*{sec:conclusion} section.
+Finally, we will conclude the report in the \ref{sec:conclusion} section.
 
 \section{Work organization}
 \label{sec:work-organization}
 
 \section{Copy model}
 \label{sec:copy-model}
-
-\dots
-
-In order to evaluate whether the copy model can provide acceptable results, we can use a baseline below which we expect the model to report the file's entropy.
-We decided to use, as a baseline, the entropy considering each symbol's relative frequency in the entire file, which is given by:
-
-$$
-H(X) = - \sum_{x \in X}{p(x) \log{p(x)}}
-$$
-
-With this value in mind, we evaluated the model as a whole with different values for its parameters, on different files.
-The files chosen for testing are present in the repository\footnote{\url{https://github.com/NMPC27/TAI-G7-Lab1}}, and they have the following baselines:
-\begin{itemize}
-    \item \verb|chry.txt|: \dots
-    \item \verb|...|: \dots
-\end{itemize}
-
-\dots
-
-Throughout this section, the different program parameters are detailed, 
-and their effect on the model's performance is studied.
-
-% \subsection{Verbose output}
-
-\subsection{Pattern size}
-
-When choosing a pointer in the past from which to start copying,
-we need to look for an occurrence of the same $k$-sized pattern as the
-one we are currently on.
-
-Thus, $k$ is one of the parameters that affects program performance, where $k$ is a positive integer.
-On one hand, a lower value of $k$
-
-\subsubsection{Results}
-
-\subsection{Smoothing parameter alpha}
-\subsection{Base probability distribution}
-\subsection{Copy pointer repositioning strategy}
-\subsection{Copy pointer reposition threshold}
 
 \dots
 
