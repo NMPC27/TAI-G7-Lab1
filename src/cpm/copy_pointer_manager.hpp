@@ -33,6 +33,12 @@ struct SimplePointerInfo {
     int copy_pointer_index;     // Pattern's last symbol
 };
 
+struct CircularArrayPointerInfo {
+    std::vector<size_t> pointers;
+    int copy_pointer_index;     // Pattern's last symbol
+    int insertion_point;        
+};
+
 /**
  * @brief Abstract class that defines the interface for the CopyPointerManager classes.
  * 
@@ -121,6 +127,25 @@ public:
     void reset();
     int getHits(std::string);
     int getMisses(std::string);
+};
+
+class CircularArrayCopyPointerManager : public CopyPointerManager {
+
+
+    std::map<std::string, CircularArrayPointerInfo> pointer_map;
+    int hits = 0;
+    int misses = 0;
+    int array_size;
+
+public:
+    CircularArrayCopyPointerManager(int size) : array_size(size) {}
+    int getCopyPointer(std::string);
+    bool registerCopyPointer(std::string, size_t);
+    void reportPrediction(std::string, bool);
+    void reset();
+    int getHits(std::string);
+    int getMisses(std::string);
+    void repositionCopyPointer(std::string, ReadingStrategy*);
 };
 
 /**

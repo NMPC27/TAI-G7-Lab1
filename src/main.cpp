@@ -82,18 +82,35 @@ int main(int argc, char** argv) {
                 break;
 
             case 'r':
-                if (optarg[0] == 'o') {
+                {
+                string optarg_string = string(optarg);
+                int pos = optarg_string.find(":");
+
+                string opt = optarg_string.substr(0, pos);
+                string value = optarg_string.substr(pos+1, optarg_string.length());
+
+                if (opt == "o") {
                     pointer_manager = new NextOldestCopyPointerManager();
-                } else if (optarg[0] == 'n') {
+                } else if (opt == "n") {
                     pointer_manager = new RecentCopyPointerManager();
-                } else if (optarg[0] == 'm') {
+                } else if (opt == "m") {
                     pointer_manager = new MostCommonCopyPointerManager();
-                } else {
+                } else if (opt == "c"){
+
+                    int circular_value = stoi(value);
+                    if (circular_value > 0){
+                        pointer_manager = new CircularArrayCopyPointerManager(circular_value);
+                    }else{
+                        cout << "Error: invalid option for '-r c:X' (" << optarg << ")" << endl;
+                        return 1;
+                    }
+                }else {
                     cout << "Error: invalid option for '-r' (" << optarg[0] << ")" << endl;
                     return 1;
                 }
+                }
                 break;
-            
+                
             case 't':
                 {
                     string optarg_string = string(optarg);
