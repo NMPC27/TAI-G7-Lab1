@@ -3,157 +3,6 @@
 #include <list>
 #include "cpm.hpp"
 
-
-bool StaticCopyPointerThreshold::surpassedThreshold(double hit_probability) {
-    return hit_probability < static_threshold;
-}
-
-void StaticCopyPointerThreshold::reset() {}
-
-bool DerivativeCopyPointerThreshold::surpassedThreshold(double hit_probability) {
-    if (previous_hit_probability == -1)
-        previous_hit_probability = hit_probability;
-
-    double derivative = hit_probability - previous_hit_probability;
-    previous_hit_probability = hit_probability;
-    return derivative < derivative_threshold;
-}
-
-void DerivativeCopyPointerThreshold::reset() {
-    previous_hit_probability = -1;
-}
-
-bool SuccessFailsCopyPointerThreshold::surpassedThreshold(double hit_probability) {
-    if (previous_hit_probability == -1)
-        previous_hit_probability = hit_probability;
-
-    bool fail = hit_probability < previous_hit_probability;
-    if (fail) fails_count++;
-    else fails_count = fails_count > 0 ? fails_count - 1 : 0;
-
-    return fails_count >= fails_threshold;
-}
-
-void SuccessFailsCopyPointerThreshold::reset() {
-    previous_hit_probability = -1;
-    fails_count = 0;
-}
-
-
-bool SimpleCopyPointerManager::registerCopyPointer(std::string pattern, size_t position) {
-    if (pointer_map.count(pattern) == 0) {
-
-        struct SimplePointerInfo pattern_info = {
-            .pointers = {position},
-            .copy_pointer_index = 0,
-        };
-
-        pointer_map.insert({pattern, pattern_info});
-        
-        return false;
-    }
-    
-    pointer_map[pattern].pointers.push_back(position);
-    return true;
-}
-
-int SimpleCopyPointerManager::getCopyPointer(std::string pattern) {
-    return pointer_map[pattern].pointers[pointer_map[pattern].copy_pointer_index];
-}
-
-void SimpleCopyPointerManager::reportPrediction(std::string pattern, bool hit) {
-    if (hit) {
-        hits++;
-    } else {
-        misses++;
-    }
-}
-
-void SimpleCopyPointerManager::reset() {
-    hits = 0;
-    misses = 0;
-}
-
-int SimpleCopyPointerManager::getHits(std::string current_pattern) { return hits; }
-
-int SimpleCopyPointerManager::getMisses(std::string current_pattern) { return misses; }
-
-void RecentCopyPointerManager::repositionCopyPointer(std::string pattern, ReadingStrategy* reading_strategy) {
-    // second to last copy pointer (because most recent could lead to predicting future)
-    pointer_map[pattern].copy_pointer_index = pointer_map[pattern].pointers.size() - 2;
-}
-
-void NextOldestCopyPointerManager::repositionCopyPointer(std::string pattern, ReadingStrategy* reading_strategy) {
-    pointer_map[pattern].copy_pointer_index += 1;
-}
-
-void MostCommonCopyPointerManager::repositionCopyPointer(std::string pattern, ReadingStrategy* reading_strategy) {
-    
-    std::list<size_t> pointer_candidates(pointer_map[pattern].pointers.begin(), pointer_map[pattern].pointers.end());
-    
-    int count;
-    int offset = 1;
-    char most_frequent = '\0';
-
-    while (most_frequent == '\0' || count > 1){
-
-        count = 0;
-
-        // Majority algorithm: first pass (determine most frequent)
-        for (size_t pointer : pointer_candidates) {
-            char char_at_pointer = reading_strategy->at(pointer + offset);
-
-            if (count == 0) {
-                most_frequent = char_at_pointer;
-                count++;
-            } else if (most_frequent == char_at_pointer) {
-                count++;
-            } else {
-                count--;
-            }
-        }
-
-        // Majority algorithm: second pass (remove all pointers that don't match the most frequent)
-        for (std::list<size_t>::iterator it = pointer_candidates.begin(); it != pointer_candidates.end();) {
-            size_t pointer = *it;
-            if (reading_strategy->at(pointer + offset) == most_frequent)
-                it++;
-            else
-                it = pointer_candidates.erase(it);
-        }
-
-        offset++;
-    }
-
-    size_t pointer_candidate = pointer_candidates.front();
-    int i;
-    for (i = 0; i < pointer_map[pattern].pointers.size(); i++)
-        if (pointer_map[pattern].pointers[i] == pointer_candidate)
-            break;
-    pointer_map[pattern].copy_pointer_index = i;
-
-}
-
-
-void UniformDistribution::setBaseDistribution(std::map<char, int> histogram) {
-    distribution.clear();
-
-    for (auto pair : histogram)
-        distribution[pair.first] = 1.0 / histogram.size();
-}
-
-void FrequencyDistribution::setBaseDistribution(std::map<char, int> histogram){
-    distribution.clear();
-
-    int total = 0;
-    for (auto pair : histogram)
-        total += pair.second;
-
-    for (auto pair : histogram)
-        distribution[pair.first] = (double) pair.second / total;
-}
-
-
 void CopyModel::initializeWithMostFrequent() {
     auto max_pair = std::max_element(alphabet_counts.begin(), alphabet_counts.end(),
             [](const std::pair<char, int>& x, const std::pair<char, int>& y) {return x.second < y.second;}
@@ -192,7 +41,7 @@ bool CopyModel::predictionSetup(bool pattern_has_past) {
         copy_pattern = current_pattern;
     }
     // Check whether copy pointer should be changed
-    else if (pointer_threshold->surpassedThreshold(hit_probability)) {
+    else if (surpassedAnyThreshold(hit_probability)) {
 
         pointer_manager->repositionCopyPointer(copy_pattern, reading_strategy);
         // Change copy pointer to a new one, this one being from the current pattern
@@ -200,7 +49,8 @@ bool CopyModel::predictionSetup(bool pattern_has_past) {
         copy_position = pointer_manager->getCopyPointer(current_pattern);
 
         pointer_manager->reset();
-        pointer_threshold->reset();
+        for (int i = 0; i < pointer_threshold_number; i++)
+            pointer_threshold[i]->reset();
     }
 
     return copy_position != current_position;
@@ -280,4 +130,11 @@ void CopyModel::guess() {
     hit_probability = 0;
     // TODO: maybe we shouldn't copy like this! this allows for editing the base distribution from outside
     probability_distribution = base_distribution->distribution;
+}
+
+bool CopyModel::surpassedAnyThreshold(double hit_probability) {
+    bool res = true;
+    for (int i = 0; i < pointer_threshold_number; i++)
+        res = res or pointer_threshold[i]->surpassedThreshold(hit_probability);
+    return res;
 }

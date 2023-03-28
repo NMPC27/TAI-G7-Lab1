@@ -1,2 +1,14 @@
 .vscode
 build
+ignore
+scripts/input/*
+scripts/processed/*
+scripts/images/*
+scripts/*.csv
+report/*
+
+!report/report.pdf
+!report/report.tex
+!scripts/input/.empty
+!scripts/processed/.empty
+!scripts/images/.empty

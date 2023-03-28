@@ -1,5 +1,25 @@
 #include <vector>
+#ifndef PARSER_HPP
+#define PARSER_HPP
 
+/**
+ *  \file parser.hpp (interface file)
+ *
+ *  \brief Lab1: CPM.
+ *
+ *  Header file for the Reading Strategy classes.
+ * 
+ *  Classes defined in this file:
+ *    \li ReadingStrategy
+ *      \li InMemoryReadingStrategy
+ *
+ *  \author Pedro Lima 97860 && Nuno Cunha 98124 && Martinho Tavares 98262
+ */
+
+/**
+ * @brief Reading Strategy interface.
+ * 
+ */
 class ReadingStrategy {
 
 public:
@@ -11,15 +31,48 @@ public:
 
 };
 
+/**
+ * @brief Reading Strategy that reads the file into memory.
+ * 
+ */
+
 class InMemoryReadingStrategy : public ReadingStrategy {
 
+    /**
+     * @brief Vector that contains the file in memory.
+     * 
+     */
     std::vector<char> mem_file;
 
 public:
+
+    /**
+     * @brief Reads a character from the file and stores it in the vector.
+     * 
+     */
     void read(char);
+    /**
+     * @brief Returns the character at the given position in the vector.
+     * 
+     * @return char 
+     */
     char at(size_t);
+    /**
+     * @brief Returns the size of the vector.
+     * 
+     * @return size_t 
+     */
     size_t endOfStream();
+<<<<<<< HEAD:src/cpm-tmp/parser.hpp
     void appendPrediction(char);
+=======
+    /**
+     * @brief Clears the vector.
+     * 
+     */
+>>>>>>> main:src/cpm/parser.hpp
     void clean();
 
 };
+
+#endif

@@ -1,0 +1,80 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{
+    Assignment 1 - Copy models for data compression \\
+    \large{Algorithmic Information Theory (2022/23) \\
+    Universidade de Aveiro}
+}
+
+\author{
+    Martinho Tavares, 98262, martinho.tavares@ua.pt \and
+    Nuno Cunha, -, - \and
+    Pedro Lima, -, -
+}
+
+\date{\today}
+\maketitle
+
+% TODO: remover se tivermos referências
+\nocite{*}
+
+\section{Introduction}
+
+\section{Work organization}
+
+\section{Copy model}
+
+\dots
+
+In order to evaluate whether the copy model can provide acceptable results, we can use a baseline below which we expect the model to report the file's entropy.
+We decided to use, as a baseline, the entropy considering each symbol's relative frequency in the entire file, which is given by:
+
+$$
+H(X) = - \sum_{x \in X}{p(x) \log{p(x)}}
+$$
+
+With this value in mind, we evaluated the model as a whole with different values for its parameters, on different files.
+The files chosen for testing are present in the repository\footnote{\url{https://github.com/NMPC27/TAI-G7-Lab1}}, and they have the following baselines:
+\begin{itemize}
+    \item \verb|chry.txt|: \dots
+    \item \verb|...|: \dots
+\end{itemize}
+
+\dots
+
+Throughout this section, the different program parameters are detailed, 
+and their effect on the model's performance is studied.
+
+% \subsection{Verbose output}
+
+\subsection{Pattern size}
+
+When choosing a pointer in the past from which to start copying,
+we need to look for an occurrence of the same $k$-sized pattern as the
+one we are currently on.
+
+Thus, $k$ is one of the parameters that affects program performance, where $k$ is a positive integer.
+On one hand, a lower value of $k$
+
+\subsubsection{Results}
+
+\subsection{Smoothing parameter alpha}
+\subsection{Base probability distribution}
+\subsection{Copy pointer repositioning strategy}
+\subsection{Copy pointer reposition threshold}
+
+\section{Text generator}
+
+\section{Conclusion}
+
+\section{References}
+\bibliography{refs}
+\bibliographystyle{IEEEtran}
+
+\end{document}
+
+
