@@ -153,13 +153,31 @@ The pointers are grouped according to that character that they predict, and the 
 Afterwards, the second next character is evaluated for every pointer in that group, and then the pointers are grouped in the same manner again, with the next group being the largest at this stage.
 This process is repeated until all pointers at the current group report different predictions, at which point the newest pointer is chosen.
 
+% TODO: talk about majority algorithm
+
 \subsubsection{Results}
 
 \subsection{Copy pointer reposition threshold}
 
-\dots
+A copy pointer is used until the predictions are deemed to not be worthwhile.
+After that point, the copy pointer is repositioned taking the current pattern into account.
+The decision of when to reposition the copy pointer can be done using different approaches.
+
+We developed 3 strategies, all of which only factor in the prediction probability over time:
+\begin{itemize}
+    \item \textbf{Static}: a static probability threshold value. If the prediction probability falls below this value, then the pointer is repositioned.
+    \item \textbf{Successive fails}: if the number of successive prediction misses is larger than a given value, then the pointer is repositioned.
+    In this case, the ``successive fails'' are evaluated using a non-negative counter of misses that is updated as predictions are made; whenever there is a miss, the counter increases, and decreases otherwise.
+    \item \textbf{Rate of change}: if the absolute difference between the current prediction probability and the previous prediction probability is below a threshold then the pointer is repositioned.
+\end{itemize}
+
+Each strategy has a threshold value associated with them, and they are passed as parameters along with the specified strategy.
+These thresholds can also be combined together, indicating whether the pointer should be repositioned when at least one of the strategies reports that their threshold was surpassed.
 
 \subsubsection{Results}
+
+The results were initially evaluated for each strategy in isolation.
+After determining the best performing threshold values for each approach, they were combined among themselves, testing the 4 possible combinations.
 
 \dots
 
