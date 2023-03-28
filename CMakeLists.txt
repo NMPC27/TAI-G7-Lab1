@@ -9,3 +9,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 add_executable(cpm src/main.cpp src/cpm/cpm.cpp src/cpm/parser.cpp src/cpm/base_distribution.cpp src/cpm/copy_pointer_manager.cpp src/cpm/copy_pointer_threshold.cpp)
+add_executable(cpm_gen src/cpm_gen.cpp)
