@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
     cout << "String inicial: " << ini_str << endl;
     cout << "Train file: " << train_file << endl;
     cout << "Num caracteres a gerar: " << num_char << endl;
-    cout << "Alow training himself: " << OPT_train << endl;
+    cout << "Alow training itself: " << OPT_train << endl;
     cout << "Alow only lower case letters: " << OPT_lower << endl;
     cout << endl;
     cout << "Working..." << endl;
@@ -238,6 +238,6 @@ void printUsage(string file) {
     cout << "Example: " << file << " -s 'As the' -f othello.txt -n 2000" << endl;
     cout << "Options:" << endl;
     cout << "  -h  help" << endl;
-    cout << "  -t  (allow training himself)" << endl;
+    cout << "  -t  (allow training itself)" << endl;
     cout << "  -l  (allow only lower case letters - better for smaller input texts)" << endl;
 }
