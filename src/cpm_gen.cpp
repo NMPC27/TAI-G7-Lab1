@@ -13,7 +13,6 @@
 using namespace std;
 
 map<char, int> alphabet;
-int count_alphabet = 0;
 map<string, vector<char> > map_patterns;
 
 bool OPT_train=false;
@@ -98,7 +97,6 @@ void firstPass(string fileName,int k) {
 
     
     while (!file.eof()) {
-        count_alphabet++;           // for calculating the base distribution
         alphabet.insert({c, 0});    // for calculating the base distribution
         alphabet[c]++;              // for calculating the base distribution
 
@@ -214,9 +212,11 @@ void cpm_gen(string ini_str,int k,int num_char) {
         pattern.erase(0, 1); // remove o primeiro caracter do padrao
         pattern += put_char;
 
-        count_alphabet++;                   // for calculating the base distribution
-        alphabet.insert({put_char, 0});     // for calculating the base distribution
-        alphabet[put_char]++;               // for calculating the base distribution
+        if (OPT_train){
+            alphabet.insert({put_char, 0});     // for calculating the base distribution
+            alphabet[put_char]++;               // for calculating the base distribution
+        }
+        
     }
 
 

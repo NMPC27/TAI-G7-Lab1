@@ -88,6 +88,22 @@ On one hand, a lower value of $k$
 \section{Text generator}
 \label{sec:text-generator}
 
+The Generator module makes use of the functionalities offered by the CPM module.
+This module uses a Context Model calculated from a received text to calculate the
+next characters based on a context phrase. 
+
+It contains two main methods, the firstPass(), that reads the training file and makes an initial pass through the text to calculate the frequencies of the characters.
+This method also makes an context model based on the training file, and the size of the context is defined by the input string. 
+
+The cpm${_}$gen() method uses the context model in the first pass to generate the text.
+When we try to generate the next symbol, we read the current context, which is the size of the input string and we check the context model for that context. If we have that context in the model, we get the list of possible next symbols, and their counts. Then, we generate a random value between 0 and the sum of the counts, and we check where that value lands between all the ranges of counts of events of that context. The symbol that is in the range of the random value is the next symbol of the text.
+If we don't have that context in the model, we get the list of all possible symbols in the alphabet, and their distribution, and we generate a random value between 0 and the sum of the distributions, and we check where that value lands between all the ranges of distributions of events of that context. The symbol that is in the range of the random value is the next symbol of the text. 
+
+We also have 2 other input parameters that modify the beavior of the generator. The first one is alow the model training himself, while generating the text. This is done by updating the context model with the generated text and the distibution of symbols in the alphabet.
+The second parameter is to allow all lowercase characters to be generated, this is done by converting all the characters to lowercase while reading the training file, this parameter provides a better context model without nedding a big training file, but it also makes the text generated to be all lowercase.
+
+
+\subsubsection{Results}
 
 \section{Conclusion}
 \label{sec:conclusion}
