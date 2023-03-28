@@ -8,6 +8,8 @@
 #include <cmath>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <chrono>
+
 #include "cpm/cpm.hpp"
 #include "main.hpp"
 
@@ -21,6 +23,9 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
+
+    chrono::steady_clock sc;   // create an object of `steady_clock` class
+    auto start = sc.now();     // start timer
 
     int c;
     int k = 4;
@@ -252,6 +257,11 @@ int main(int argc, char** argv) {
     }
     cout << "Mean amount of information of a symbol: " << information_sum/sum << " bits" << endl;
     cout << "Total amount of information: " << information_sum << " bits" << endl;
+
+    auto end = sc.now();
+    auto time_span = static_cast<chrono::duration<double>>(end - start);   // measure time span between start & end
+
+    cout << "Time elapsed: " << time_span.count() << " seconds" << endl;
 
     return 0;
 }
