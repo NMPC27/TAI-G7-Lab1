@@ -139,10 +139,18 @@ Therefore, we don't disregard the possibility that the assumption of the distrib
 Different strategies can be followed when choosing a copy pointer from which to start copying.
 We developed 3 approaches, 2 of which being fairly simplistic:
 \begin{itemize}
-    \item Oldest pointer first: the chosen copy pointer
-    \item Newest pointer first:
-    \item Most common prediction:
+    \item \textbf{Oldest pointer first}: the chosen copy pointer is the oldest possible. If the current copy pointer is repositioned because the threshold was met, then that pointer will be completely discarded and the next oldest pointer is used.
+    This is the most simple approach, which assumes similar patterns are very far in the file;
+    \item \textbf{Newest pointer first}: the chosen copy pointer is always the newest, which assumes that similar patterns are very close in the file;
+    \item \textbf{Most common prediction}: when a pointer has to be chosen, the predictions of all registered pointers are evaluated, and the pointer (or one of them) which presented longest and most common prediction is chosen.
+    A more detailed description of this strategy is presented below.
 \end{itemize}
+
+The \textbf{most common prediction} strategy chooses the copy pointer in successive iterations.
+Initially, the next immediate character is evaluated for every registered pointer.
+The pointers are grouped according to that character that they predict, and the largest group is chosen, i.e. the pointers that reported the most common prediction are chosen.
+Afterwards, the second next character is evaluated for every pointer in that group, and then the pointers are grouped in the same manner again, with the next group being the largest at this stage.
+This process is repeated until all pointers at the current group report different predictions, at which point the newest pointer is chosen.
 
 \subsubsection{Results}
 
@@ -151,6 +159,8 @@ We developed 3 approaches, 2 of which being fairly simplistic:
 \dots
 
 \subsubsection{Results}
+
+\dots
 
 \subsection{Verbose output}
 
