@@ -1,40 +1,16 @@
 # TAI-G7-Lab1
 
-## Requirements
+a string inicial influencia muito, deve ter em conta:
+-linguagem do testo de input
+-nao deve ser nomes/coisas especiais
+-o tamanho deve ser de uma palavra normal
+	- muito grande, faz com que nao va ter padroes
+	- muito pequeno vai gerar palavras sem sentido
 
-- CMake >= 3.10
+train file, deve ser o maior possivel, para que o modelo seja o mais preciso possivel
 
-## Building
+allow only lower case letters - better for smaller input texts (and overall better)
 
-In order to build the project, first create a `build` directory and generate a CMake native build environment.
-If using Linux, run:
+allow training himself - depende muito dos outos parametros
+                        (TALVEZ -> better for larger input texts)
 
-```
-mkdir build
-cd build
-cmake ..
-```
-
-After that, build the binaries, within the `build` directory:
-
-```
-cmake --build .
-```
-
-The generated binaries will be present in the `bin` folder.
-
-## Usage
-
-### `cpm`
-
-To use the copy model, run:
-
-```
-./bin/cpm <k> <file>
-```
-
-...
-
-### `cpm-gen`
-
-...

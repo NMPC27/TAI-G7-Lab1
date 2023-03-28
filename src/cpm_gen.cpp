@@ -1,109 +1,261 @@
 #include <iostream>
+#include <fstream>
+#include <map>
+#include <algorithm>
 #include <string>
-#include <sstream>
-#include <random>
+#include <list>
+#include <vector>
+#include <cmath>
+#include<time.h>
 #include "unistd.h"
-#include "cpm.hpp"
 #include "cpm_gen.hpp"
 
 using namespace std;
 
+map<char, int> alphabet;
+int count_alphabet = 0;
+map<string, vector<char> > map_patterns;
+
+bool OPT_train=false;
+bool OPT_lower=false;
+
+int num_guess = 0;
 
 int main(int argc, char** argv) {
+    srand(time(0)); //! seed for random number generator -> aleatorio
 
     int c;
-    int k = 4;
-    double alpha = 0.1;
-    ReadingStrategy* reading_strategy;
-    CopyPointerThreshold* pointer_threshold;
-    CopyPointerManager* pointer_manager;
-    BaseDistribution* base_distribution;
+    
 
-    // TODO: command-line parsing, same from main
+    string ini_str="";
+    string train_file="";
+    int num_char = 0;
 
-    if (optind == argc) {
-        cout << "Error: no file was specified!" << endl;
+    
+    while ((c = getopt(argc, argv, "htls:f:n:")) != -1){
+        switch(c){
+            case 'h':
+                printUsage(argv[0]);
+                return 0;
+            case 's': 
+                ini_str=optarg;
+                break;
+            case 'f': 
+                train_file=optarg;
+                break;
+            case 'n':
+                num_char = stoi(optarg);
+                break;
+            case 't':
+                OPT_train=true;
+                break;
+            case 'l':
+                OPT_lower=true;
+                break;
+                            
+            case '?':
+                printUsage(argv[0]);
+                return 1;
+        }
+    }
+
+    if (ini_str == "" || train_file == "" || num_char <= 0) {
+        printUsage(argv[0]);
         return 1;
     }
 
-    // TODO: obtain from passed argsuments
-    InMemoryReadingStrategy imrs = InMemoryReadingStrategy();
-    StaticCopyPointerThreshold scpt = StaticCopyPointerThreshold();
-    RecentCopyPointerManager rcpm = RecentCopyPointerManager();
-    UniformDistribution ud = UniformDistribution();
-    reading_strategy = &imrs;
-    pointer_threshold = &scpt;
-    pointer_manager = &rcpm;
-    base_distribution = &ud;
+    cout << "String inicial: " << ini_str << endl;
+    cout << "Train file: " << train_file << endl;
+    cout << "Num caracteres a gerar: " << num_char << endl;
+    cout << "Alow training himself: " << OPT_train << endl;
+    cout << "Alow only lower case letters: " << OPT_lower << endl;
+    cout << endl;
+    cout << "Working..." << endl;
+    cout << endl;
+    
 
-    CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_threshold, pointer_manager, base_distribution);
+    firstPass(train_file,ini_str.size());
 
-    string fileName = string(argv[optind]);
-    model.firstPass(fileName);
 
-    model.initializeWithMostFrequent();
-    while (!model.eof()) {
-        model.registerPattern();
-        model.predict();
-        model.advance();
-    }
+    //printMap(map_patterns); //! DEBUG
+    //cout << endl;
+    //printAlphabet(alphabet);  //! DEBUG
 
-    cout << "Predictions:" << endl;
+    cpm_gen(ini_str,ini_str.size(), num_char);
 
-    unsigned int number_of_symbols_to_predict;
-    string input_line;
-    mt19937 gen;
-    gen.seed(1);
-    uniform_real_distribution<> dis(0.0, 1.0);
-
-    getline(cin, input_line);
-    stringstream(input_line) >> number_of_symbols_to_predict;
-    while (number_of_symbols_to_predict > 0) {
-        for (unsigned int i = number_of_symbols_to_predict; i > 0; i--) {
-            model.registerPattern();
-            model.predict();
-            
-            double random_number = dis(gen);
-            char selected_symbol;
-            double cummulative_sum = 0.0;
-            for (auto pair : model.probability_distribution) {
-                if (random_number < cummulative_sum)
-                    break;
-                selected_symbol = pair.first;
-                cummulative_sum += pair.second;
-            }
-
-            reading_strategy->appendPrediction(selected_symbol);
-            cout << selected_symbol;
-
-            model.advance();
-        }
-
-        getline(cin, input_line);
-        stringstream(input_line) >> number_of_symbols_to_predict;
-    }
+    cout << "Done!" << endl;
+    cout << "Num guesses: " << num_guess << "/" << num_char << endl;
+    cout << "Output file: out.txt" << endl;
 
     return 0;
 }
 
-void printUsage(char* prog_name) {
-    cout << "Usage: " << prog_name << " [OPTIONS] file" << endl;
+void firstPass(string fileName,int k) {
+
+    ifstream file(fileName);
+
+    string pattern = "";
+    char c = file.get();
+
+    if (OPT_lower) {
+        c = tolower(c);
+    }
+
+    
+    while (!file.eof()) {
+        count_alphabet++;           // for calculating the base distribution
+        alphabet.insert({c, 0});    // for calculating the base distribution
+        alphabet[c]++;              // for calculating the base distribution
+
+        pattern += c; 
+
+        if(pattern.size() >= k+1) { // k+1 para incluir o caracter seguinte ao padrao
+
+            map_patterns[pattern.substr(0,k)].push_back(pattern[k]);
+
+            pattern.erase(0, 1); // remove o primeiro caracter do padrao
+
+        }
+
+
+        c = file.get();
+
+        if (OPT_lower) {
+            c = tolower(c);
+        }
+        
+    }
+
+    file.close();
 }
 
-void printOptions() {
+
+void cpm_gen(string ini_str,int k,int num_char) {
+
+    ofstream OutFile("out.txt");
+    
+    OutFile << ini_str << "|";
+
+    int char_counter = 0;
+    string pattern = ini_str;
+
+    while (char_counter<num_char) {
+
+        char put_char;
+        
+        if (map_patterns.count(pattern) == 0) { //padrao nao esta no map
+
+            num_guess++;
+
+            // mandar um caracter "aleatorio"
+            double max = 0;
+            int total_simbols = 0;
+            for(std::map<char,int>::iterator it = alphabet.begin(); it != alphabet.end(); ++it) {
+                total_simbols += it->second;
+            }
+
+            int random = rand() % total_simbols; // gera um numero aleatorio entre 0 e total_simbols-1
+
+            int sum = 0;
+            for(std::map<char,int>::iterator it = alphabet.begin(); it != alphabet.end(); ++it) {
+                if (sum <= random && random < sum + alphabet[it->first]) {
+                    put_char = it->first;
+                    break;
+                }
+                sum += alphabet[it->first];
+            }
+
+            if (OPT_train){
+                // aprender com ele mesmo -> por o padrao no map com simbolo aleatorio como proximo
+                map_patterns[pattern].push_back(put_char);     
+            }
+
+        } else { //padrao ja esta no map
+
+            map <char, int> tmp;
+
+            int total_simbols = 0;
+            for (char c : map_patterns[pattern]) {
+
+                if (c == '\0') {
+                    continue;
+                }
+
+                tmp[c]++;
+                total_simbols++;
+            }
+
+            if (total_simbols == 0) { //! DEBUG
+                cout << "ERRO: total_simbols = 0" << endl;
+            }
+
+            int random = rand() % total_simbols; // gera um numero aleatorio entre 0 e total_simbols-1
+
+            int sum = 0;
+            for(std::map<char,int>::iterator it = alphabet.begin(); it != alphabet.end(); ++it) {
+                if (sum <= random && random < sum + tmp[it->first]) {
+                    put_char = it->first;
+                    break;
+                }
+                sum += tmp[it->first];
+            }
+
+
+            if (OPT_train){
+                // aprender com o caracter gerado -> por o padrao no map com simbolo gerado como proximo
+                map_patterns[pattern].push_back(put_char);
+            }
+            
+        }
+
+        OutFile << put_char;
+
+        if (put_char == '\0') //! DEBUG
+        {
+            cout << "ERRO: put_char = \\0" << endl;
+        }
+        
+        char_counter++;
+        pattern.erase(0, 1); // remove o primeiro caracter do padrao
+        pattern += put_char;
+
+        count_alphabet++;                   // for calculating the base distribution
+        alphabet.insert({put_char, 0});     // for calculating the base distribution
+        alphabet[put_char]++;               // for calculating the base distribution
+    }
+
+
+    OutFile.close();
+}
+
+
+void printUsage(string file) {
+    cout << "Usage: " << file << " -s 'string inicial' -f train_file.txt -n num_caracteres_a_gerar [OPTIONS]" << endl;
+    cout << "Example: " << file << " -s 'As the' -f othello.txt -n 2000" << endl;
     cout << "Options:" << endl;
-    cout << "\t-h\t\tShow this help message" << endl;
-    cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
-    cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
-    cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: d):" << endl;
-    cout << "\t\t\t\tu - uniform distribution" << endl;
-    cout << "\t\t\t\td - distribution based on the symbols' relative frequencies" << endl;
-    cout << "\t-b\t\tRead file in binary" << endl;
-    cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
-    cout << "\t\t\t\to - oldest" << endl;
-    cout << "\t\t\t\tn - newer" << endl;
-    cout << "\t-t T\t\tThreshold for copy pointer switch (default: n:0.50):" << endl;
-    cout << "\t\t\t\tn:X - static probability below X" << endl;
-    cout << "\t\t\t\tf:X - number of successive fails above X" << endl;
-    cout << "\t\t\t\tc:X - absolute value of the negative derivative of the prediction probability above X" << endl;
+    cout << "  -h  help" << endl;
+    cout << "  -t  (allow training himself)" << endl;
+    cout << "  -l  (allow only lower case letters - better for smaller input texts)" << endl;
+}
+
+
+void printAlphabet(map<char, int> pointer_map) {
+    cout << "Alphabet: " << endl;
+
+    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
+        cout << it->first << " : " << it->second << endl;
+    }
+
+}
+
+
+void printMap(map<string, vector<char>> pointer_map) {
+
+    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
+        cout << it->first << " : ";
+        for (char c : it->second) {
+            cout << "|" << c << "|";
+        }
+        cout << endl;
+    }
 }
