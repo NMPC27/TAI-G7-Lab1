@@ -27,7 +27,6 @@ public:
     virtual void read(char) = 0;
     virtual char at(size_t) = 0;
     virtual size_t endOfStream() = 0;
-    virtual void appendPrediction(char) = 0;
 
 };
 
@@ -63,14 +62,10 @@ public:
      * @return size_t 
      */
     size_t endOfStream();
-<<<<<<< HEAD:src/cpm-tmp/parser.hpp
-    void appendPrediction(char);
-=======
     /**
      * @brief Clears the vector.
      * 
      */
->>>>>>> main:src/cpm/parser.hpp
     void clean();
 
 };

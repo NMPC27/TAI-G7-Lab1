@@ -12,10 +12,6 @@ size_t InMemoryReadingStrategy::endOfStream() {
     return this->mem_file.size();
 }
 
-void InMemoryReadingStrategy::appendPrediction(char predicted) {
-    this->mem_file.push_back(predicted);
-}
-
 void InMemoryReadingStrategy::clean() {
     this->mem_file.clear();
 }
