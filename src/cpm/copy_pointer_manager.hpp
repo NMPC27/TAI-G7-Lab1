@@ -41,6 +41,7 @@ struct SimplePointerInfo {
  */
 class CopyPointerManager {
 public:
+    virtual ~CopyPointerManager() {};
 /**
  * @brief Get the Copy Pointer from a pattern.
  * 
@@ -113,6 +114,7 @@ protected:
     int misses = 0;
 
 public:
+    virtual ~SimpleCopyPointerManager() {};
     int getCopyPointer(std::string);
     bool registerCopyPointer(std::string, size_t);
     void reportPrediction(std::string, bool);

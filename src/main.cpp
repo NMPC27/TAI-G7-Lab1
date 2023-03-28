@@ -227,6 +227,8 @@ int main(int argc, char** argv) {
             case VerboseMode::progress:
                 printf("Progress: %3f%%\r", model.progress() * 100);
                 break;
+            case VerboseMode::none:
+                break;
         }
         information_sums[model.actual] += -log2(model.probability_distribution[model.actual]);
     }

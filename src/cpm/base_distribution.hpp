@@ -30,6 +30,7 @@ public:
  * 
  * This method uses the histogram count to set the base distribution.
  */
+    virtual ~BaseDistribution() {};
     virtual void setBaseDistribution(std::map<char, int> histogram) = 0;
     std::map<char, double> distribution;
 };

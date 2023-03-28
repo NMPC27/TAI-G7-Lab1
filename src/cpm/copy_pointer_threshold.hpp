@@ -26,6 +26,7 @@
  */
 class CopyPointerThreshold {
 public:
+    virtual ~CopyPointerThreshold() {};
 /**
  * @brief Uses the hit probability to determine if the copy pointer should be repositioned. Will be overwritten by the classes that inherit from this class, which are the different strategies we implemented for this.
  * 
