@@ -63,6 +63,15 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    string tmp_str = "";
+    if (OPT_lower) {
+        for (int x=0; x<ini_str.size(); x++){
+            tmp_str += tolower(ini_str[x]);
+        }
+
+        ini_str = tmp_str;
+    }
+
     cout << "String inicial: " << ini_str << endl;
     cout << "Train file: " << train_file << endl;
     cout << "Num caracteres a gerar: " << num_char << endl;
@@ -71,7 +80,7 @@ int main(int argc, char** argv) {
     cout << endl;
     cout << "Working..." << endl;
     cout << endl;
-    
+
 
     firstPass(train_file,ini_str.size());
 

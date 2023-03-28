@@ -14,6 +14,8 @@ allow only lower case letters - better for smaller input texts (and overall bett
 allow training himself - depende muito dos outos parametros
                         (TALVEZ -> better for larger input texts)
 
+quanto menor o padrao, mais tempo demora a gerar
+
 ```
 mkdir build
 cd build
@@ -158,4 +160,8 @@ time taken: 2m20,142s
 
 ### `cpm-gen`
 
-...
+To use the copy model, run:
+
+```
+./bin/cpm_gen -s 'string inicial' -f train_file.txt -n num_caracteres_a_gerar [OPTIONS]
+```
