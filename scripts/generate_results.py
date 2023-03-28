@@ -1,4 +1,5 @@
 import subprocess
+import gzip
 from argparse import ArgumentParser
 
 """
@@ -30,5 +31,5 @@ if __name__ == '__main__':
         cmd += ['-t', t]
     cmd += [source_path]
 
-    with open(f'./input/{results_fname}.csv', 'w') as f:
+    with gzip.open(f'./input/{results_fname}.csv', 'w') as f:
         subprocess.run(cmd, stdout=f)

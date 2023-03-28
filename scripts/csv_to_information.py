@@ -1,5 +1,6 @@
 import numpy as np
 import os.path
+import gzip
 from os import stat
 from math import log2
 from argparse import ArgumentParser
@@ -18,7 +19,7 @@ def get_approximate_byte_count(file_name: str) -> int:
 def get_information(file_name: str, max_size: int) -> np.ndarray:
     information_steps: np.ndarray = np.empty((max_size, 1), dtype=np.float32)
 
-    with open(file_name, 'rt') as f:
+    with gzip.open(file_name, 'rt') as f:
         f.readline()    # skip header
         for i, line in enumerate(f):
             line = line[:-1]    # remove newline

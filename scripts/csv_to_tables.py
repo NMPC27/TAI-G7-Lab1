@@ -1,5 +1,6 @@
 import os.path
 import subprocess
+import gzip
 from argparse import ArgumentParser
 from typing import List
 from common import parse_processed_name
@@ -24,7 +25,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     separator = '\t'
 
-    with open(args.output, 'wt') as f:
+    with gzip.open(args.output, 'wt') as f:
         f.write('k\talpha\tdistribution\tmanager\tthresholds\tentropy\n')
         for fname in args.file:
             fname_base, _ = os.path.splitext(os.path.basename(fname))
