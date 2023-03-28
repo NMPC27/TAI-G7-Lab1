@@ -153,7 +153,10 @@ The pointers are grouped according to that character that they predict, and the 
 Afterwards, the second next character is evaluated for every pointer in that group, and then the pointers are grouped in the same manner again, with the next group being the largest at this stage.
 This process is repeated until all pointers at the current group report different predictions, at which point the newest pointer is chosen.
 
-% TODO: talk about majority algorithm
+In order to obtain the most common prediction at each iteration, the Boyer-Moore majority vote algorithm was used \cite{majority}.
+This is a very space-efficient algorithm (complexity $O(1)$) that guarantees the majority value will be returned.
+However, if a majority value doesn't actually exist then the algorithm may erroneously report a value as the majority, if we only do one pass.
+Since in this case we don't have a specific disambiguation strategy when the pointers don't agree, the choice is arbitrary and thus this is not a problem.
 
 \subsubsection{Results}
 
