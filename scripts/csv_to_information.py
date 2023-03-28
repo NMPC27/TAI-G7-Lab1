@@ -53,7 +53,7 @@ def process_and_save_information_and_entropy(main_file_name: str):
     assert os.path.exists(source_file_path), f'Source file \'{source_file_path}\' doesn\'t exist!'
     assert os.path.exists(results_file_path), f'Source file \'{results_file_path}\' doesn\'t exist!'
     
-    (results_file_path_without_extension, _), _ = os.path.splitext(os.path.splitext(os.path.basename(results_file_path)))
+    results_file_path_without_extension = os.path.splitext(os.path.splitext(os.path.basename(results_file_path))[0])[0]
     processed_information_file_path = f'./processed/{results_file_path_without_extension}_information.npy'
     processed_entropy_file_path = f'./processed/{results_file_path_without_extension}_entropy.npy'
 
