@@ -13,7 +13,7 @@
 \author{
     Martinho Tavares, 98262, martinho.tavares@ua.pt \and
     Nuno Cunha, -, - \and
-    Pedro Lima, -, -
+    Pedro Lima, 97860, p.lima@ua.pt
 }
 
 \date{\today}
@@ -24,9 +24,27 @@
 
 \section{Introduction}
 
+One of the goals of this assignment is to implement a copy model for data compression, which is obtained through the exploration of self similarities.
+A copy model is only one of the ways to address the problem, and it's idea is that certain data sources can be viewed as a sequence of repetitive patterns,
+where parts of the data have been replicated in the past, although some modifications are possible. 
+The model consists in predicting the next symbol based on previous ones observed in the past, by keeping a pointer referring to the symbol being copied, as well as other information.
+
+The second goal of the assignment is to implement a text generator based on the copy model, which is a way to generate new text based on a given one.
+The text generator receives a text as input to train the model, and then follows a similar approach to the one used in the copy model,
+but instead of predicting the next symbol, it uses the probability distribution to generate a random symbol based on these probabilities.
+
+In this report we will first present how the work was organized, in the \ref*{sec:work-organization} section.
+Then, we will present the \ref*{sec:copy-model}, how we implemented it and the results obtained, which we will compare by calculating the entropy of different text examples,
+like chry.txt given by the teachers, with different parameters we defined for the model.
+The next section is dedicated to the \ref*{sec:text-generator}, where we will present the implementation and the results obtained for the text generator,
+using different texts as input for training of the generator, as well as diferrent starting points for the generation of text.
+Finally, we will conclude the report in the \ref*{sec:conclusion} section.
+
 \section{Work organization}
+\label{sec:work-organization}
 
 \section{Copy model}
+\label{sec:copy-model}
 
 \dots
 
@@ -68,8 +86,12 @@ On one hand, a lower value of $k$
 \subsection{Copy pointer reposition threshold}
 
 \section{Text generator}
+\label{sec:text-generator}
+
 
 \section{Conclusion}
+\label{sec:conclusion}
+
 
 \section{References}
 \bibliography{refs}
