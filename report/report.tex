@@ -20,9 +20,6 @@
 \date{\today}
 \maketitle
 
-% TODO: remover se tivermos referências
-\nocite{*}
-
 \section{Introduction}
 
 One of the goals of this assignment is to implement a copy model for data compression, which is obtained through the exploration of self similarities.
@@ -145,6 +142,7 @@ We developed 3 approaches, 2 of which being fairly simplistic:
     \item \textbf{Newest pointer first}: the chosen copy pointer is always the newest, which assumes that similar patterns are very close in the file;
     \item \textbf{Most common prediction}: when a pointer has to be chosen, the predictions of all registered pointers are evaluated, and the pointer (or one of them) which presented longest and most common prediction is chosen.
     A more detailed description of this strategy is presented below.
+    \item \textbf{Most common prediction bounded}: the approach is exactly the same as the \textbf{most common prediction}, with the only difference being that the registered pointers for each pattern are stored in a circular array with limited size.
 \end{itemize}
 
 The \textbf{most common prediction} strategy chooses the copy pointer in successive iterations.
@@ -157,6 +155,10 @@ In order to obtain the most common prediction at each iteration, the Boyer-Moore
 This is a very space-efficient algorithm (complexity $O(1)$) that guarantees the majority value will be returned.
 However, if a majority value doesn't actually exist then the algorithm may erroneously report a value as the majority, if we only do one pass.
 Since in this case we don't have a specific disambiguation strategy when the pointers don't agree, the choice is arbitrary and thus this is not a problem.
+
+The bounded version of \textbf{most common prediction} uses a circular array for the set of registered pointers.
+The idea is for the array of registered pointers to contain only the $N$ most recent pointers, with $N$ being the array size.
+This can not only take into account the locality that the file's content may have, i.e. the repeated patterns being close to each other, but it also bounds the array size to a fixed value, which helps in performance since the reposition algorithm previously described has linear time complexity $O(N)$, when the other strategies have only $O(1)$ complexity.
 
 \subsubsection{Results}
 
