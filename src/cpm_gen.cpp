@@ -6,8 +6,8 @@
 #include <list>
 #include <vector>
 #include <cmath>
-#include<time.h>
-#include "unistd.h"
+#include <time.h>
+#include <unistd.h>
 #include "cpm_gen.hpp"
 
 using namespace std;
@@ -75,11 +75,6 @@ int main(int argc, char** argv) {
     
 
     firstPass(train_file,ini_str.size());
-
-
-    //printMap(map_patterns); //! DEBUG
-    //cout << endl;
-    //printAlphabet(alphabet);  //! DEBUG
 
     cpm_gen(ini_str,ini_str.size(), num_char);
 
@@ -236,26 +231,4 @@ void printUsage(string file) {
     cout << "  -h  help" << endl;
     cout << "  -t  (allow training himself)" << endl;
     cout << "  -l  (allow only lower case letters - better for smaller input texts)" << endl;
-}
-
-
-void printAlphabet(map<char, int> pointer_map) {
-    cout << "Alphabet: " << endl;
-
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : " << it->second << endl;
-    }
-
-}
-
-
-void printMap(map<string, vector<char>> pointer_map) {
-
-    for (auto it = pointer_map.begin(); it != pointer_map.end(); it++) {
-        cout << it->first << " : ";
-        for (char c : it->second) {
-            cout << "|" << c << "|";
-        }
-        cout << endl;
-    }
 }
