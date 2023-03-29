@@ -30,7 +30,7 @@ def plot_information(information_steps: np.ndarray, sliding_entropy: np.ndarray,
     plt.title(f'Information throughout the message coding steps ({source_file_name})\n(k={k}, alpha={alpha}, p={probability_distribution}, r={pointer_manager}, t={thresholds})')
     plt.xlabel('step')
     plt.ylabel('bits')
-    plt.savefig(f'./images/{processed_file_name}.png')
+    plt.savefig(f'./images/{processed_file_name}.png', bbox_inches='tight')
     plt.close()
 
 if __name__ == '__main__':

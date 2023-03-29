@@ -28,6 +28,7 @@ if __name__ == '__main__':
     with open(args.output, 'wt') as f:
         f.write('k\talpha\tdistribution\tmanager\tthresholds\tentropy\ttime\n')
         for fname in args.file:
+            print('Getting info...')
             fname_base = os.path.splitext(os.path.splitext(os.path.basename(fname))[0])[0]
             _, k, alpha, distribution, manager, thresholds = parse_processed_name(fname_base)
             
@@ -42,3 +43,4 @@ if __name__ == '__main__':
             time = float(results_block[-1][len(prefix):-len(suffix)])
             
             f.write(f'{k}\t{alpha}\t{distribution}\t{manager}\t{thresholds}\t{entropy}\t{time}\n')
+            print('Written for', fname)
