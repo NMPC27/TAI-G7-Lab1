@@ -4,7 +4,6 @@ build
 ignore
 scripts/input/*
 scripts/processed/*
-scripts/*.csv
 report/*
 src/*.txt
 
