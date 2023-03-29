@@ -142,6 +142,115 @@ The results on changing this value will be studied taking this exponential growt
 
 \subsubsection{Results}
 
+To compare the effects of changing $k$, we ran the program with $k$ from 5 to 12 while keeping all other parameters with the default values.
+Some of the results on the information of the current symbol in the message and the reported file entropy at each step in the coding process are
+present in figure \ref{fig:results-pattern-size}, for file \verb|chry.txt|.
+For file \verb|othello.txt|, the results are in figure \ref{fig:results-pattern-size-other}.
+
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_5_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 5$}
+        \label{fig:results-pattern-size-5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_7_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 7$}
+        \label{fig:results-pattern-size-7}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_9_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 9$}
+        \label{fig:results-pattern-size-9}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_11_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 11$}
+        \label{fig:results-pattern-size-11}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_13_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 13$}
+        \label{fig:results-pattern-size-13}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_15_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 15$}
+        \label{fig:results-pattern-size-15}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the $k$ parameter on ``chry.txt''.}
+    \label{fig:results-pattern-size}
+\end{figure}
+
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_5_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 5$}
+        \label{fig:results-pattern-size-other-5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_7_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 7$}
+        \label{fig:results-pattern-size-other-7}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_9_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 9$}
+        \label{fig:results-pattern-size-other-9}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_11_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 11$}
+        \label{fig:results-pattern-size-other-11}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_13_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 13$}
+        \label{fig:results-pattern-size-other-13}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_15_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$k = 15$}
+        \label{fig:results-pattern-size-other-15}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the $k$ parameter on ``othello.txt''.}
+    \label{fig:results-pattern-size-other}
+\end{figure}
+
+
+
 \dots
 
 \subsection{Smoothing parameter alpha}
@@ -400,7 +509,7 @@ This can not only take into account the locality that the file's content may hav
 
 \subsubsection{Results}
 
-Figures \ref{fig:results-reposition} and \ref{fig:results-reposition-other} show the results for the symbol information and entropy throughout both files.
+Figures \ref{fig:results-reposition} and \ref{fig:results-reposition-other} show the results for the symbol information and entropy throughout both files in the first three modes of execution.
 
 \begin{figure}
     \begin{subfigure}[b]{0.3\textwidth}
@@ -426,14 +535,14 @@ Figures \ref{fig:results-reposition} and \ref{fig:results-reposition-other} show
         \caption{Most common prediction.}
         \label{fig:results-reposition-m}
     \end{subfigure}
-    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy.}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy on ``chry.txt''.}
     \label{fig:results-reposition}
 \end{figure}
 
 \begin{figure}
     \begin{subfigure}[b]{0.3\textwidth}
         \begin{center}
-            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_n_[f:6,].png}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_n_[f:6,].png}
         \end{center}
         \caption{Oldest pointer first.}
         \label{fig:results-reposition-other-n}
@@ -441,7 +550,7 @@ Figures \ref{fig:results-reposition} and \ref{fig:results-reposition-other} show
     \hfill
     \begin{subfigure}[b]{0.3\textwidth}
         \begin{center}
-            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_o_[f:6,].png}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_o_[f:6,].png}
         \end{center}
         \caption{Newest pointer first.}
         \label{fig:results-reposition-other-o}
@@ -449,14 +558,54 @@ Figures \ref{fig:results-reposition} and \ref{fig:results-reposition-other} show
     \hfill
     \begin{subfigure}[b]{0.3\textwidth}
         \begin{center}
-            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:6,].png}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[f:6,].png}
         \end{center}
         \caption{Most common prediction.}
         \label{fig:results-reposition-other-m}
     \end{subfigure}
-    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy.}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy on ``othello.txt''.}
     \label{fig:results-reposition-other}
 \end{figure}
+
+There is almost no notable difference between the pointer reposition strategies for both files, specially for \verb|othello.txt|.
+In the \verb|chry.txt| file, for the \textbf{oldest} and \textbf{newest pointer first} strategies a very good copy is performed at around $1.6\times10^7$ steps, as evidenced by the low information per symbol that was reported, which was consistently below 2 bits.
+On the other hand, the \textbf{most common prediction} strategy, even though evidenced a good copy as well, the reported information values were less consistent during the copy and were closer to the desired limit of 2 bits.
+For the \verb|othello.txt| file, there is no noteworthy difference between modes.
+
+Figure \ref{fig:results-reposition-c} shows the results for the bounded version of \textbf{most common prediction} with a circular array (BMCP), for different values of the array size.
+These results are for the \verb|chry.txt| file only, since for \verb|othello.txt| there was no discernible difference between modes and so we deemed it was not worth it to present.
+
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_c:10_[f:6,].png}
+        \end{center}
+        \caption{Size 10.}
+        \label{fig:results-reposition-c-10}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_c:100_[f:6,].png}
+        \end{center}
+        \caption{Size 100.}
+        \label{fig:results-reposition-c-100}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_c:1000_[f:6,].png}
+        \end{center}
+        \caption{Size 1000.}
+        \label{fig:results-reposition-c-1000}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the size of the circular array on the BMCP strategy on ``othello.txt''.}
+    \label{fig:results-reposition-c}
+\end{figure}
+
+When the array size is 10, in figure \ref{fig:results-reposition-c-10}, the symbol information is consistently high at around $0.75\times10^7$ steps, with no good predictions, which was not verified for the other modes.
+Other than that, the good copy that was previously seen at around $1.6\times10^7$ can be verified for the modes with array size 10 and 100, but more inconsistent correct prediction values are seen for array size 1000.
+Overall, 
 
 \subsection{Copy pointer reposition threshold}
 
@@ -478,7 +627,7 @@ These thresholds can also be combined together, indicating whether the pointer s
 \subsubsection{Results}
 
 The results were initially evaluated for each strategy in isolation.
-After determining the best performing threshold values for each approach, they were combined among themselves, testing the 4 possible combinations.
+The combinations of thresholds were not tested due to time constraints.
 
 \dots
 
@@ -854,7 +1003,7 @@ model provides.
 
 \subsection{Copy Model}
 
-\subsection{CPM_gen}
+\subsection{CPM Gen}
 
 
 By looking at the results we can conclude that the initial string, which is our K, is the parameter that influences our results the most.
