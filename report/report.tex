@@ -6,6 +6,12 @@
 \usepackage{hyperref}
 \usepackage{listings}
 
+% TODO: evaluate entropy for the generated text!!!
+% TODO: alpha difference when it is below 0?
+% TODO: the lesser the K, the more time the MostCommonPrediction manager takes
+% TODO: final conclusion: we didn't take into account *when* we should start copying, since we copy as soon we can
+% TODO: due to time constraints, the thresholds were not evaluated in conjunction
+
 \begin{document}
 
 \title{
@@ -84,10 +90,10 @@ The generated past is simple, it is composed of $k$ repetitions of a single symb
 This symbol is the most frequent of the entire alphabet.
 
 In order to evaluate whether the copy model can provide acceptable results, we can use a baseline below which we expect the model to report the file's entropy.
-We decided to use, as a baseline, the entropy considering each symbol's relative frequency in the entire file, which is given by:
+We decided to use, as a baseline, the entropy considering each symbol's relative frequency in the entire file in bits, which is given by:
 
 $$
-H(X) = - \sum_{x \in X}{p(x) \log{p(x)}}
+H(X) = - \sum_{x \in X}{p(x) \log_{2}{p(x)}}
 $$
 
 With this value in mind, we evaluated the model as a whole with different values for its parameters, on different files.
@@ -98,6 +104,7 @@ The files chosen for testing are present in the repository\footnote{\url{https:/
 \end{itemize}
 
 Throughout this section, the different program parameters are detailed, and their effect on the model's performance, both in terms of execution time and quality of the results, is studied.
+To analyze the effect of a parameter $l$, the copy model is run with different values for $l$ while keeping all other parameters with the default values.
 
 For the results regarding the information content of the symbols throughout the \verb|chry.txt| file, the data was transformed with a low-pass filter using a moving average, since there are too many data points.
 
@@ -124,7 +131,7 @@ $$
 P(\textnormal{hit}) = \frac{N_h + \alpha}{N_h + N_f + 2\alpha}
 $$
 
-where $N_h$ and $N_f$ are respectively the number of hits and misses, and $\alpha$ is the smoothing parameter.
+where $N_h$ and $N_f$ are respectively the number of hits (correct predictions) and misses (wrong predictions), and $\alpha$ is the smoothing parameter.
 The smoothing parameter is used to avoid the model having a probability of 0 when there are no hits or misses, which will happen when no prediction has been made yet, and also avoid assuming with complete certainty (probability of 1) that the prediction will be correct when no fails were made yet, which will result in infinite information in case the prediction fails.
 
 If $\alpha$ is lower, we expect the reported probabilites to be more ``certain'' with a greater possibility of reaching high values.
@@ -133,6 +140,11 @@ If $\alpha$ is greater, the smoothing effect should be more pronounced, producin
 This trade-off between $\alpha$ and the reported information, especially regarding the information spikes that may occur, will be studied in the results.
 
 \subsubsection{Results}
+
+Runs were performed with $\alpha \in {0.25, 0.5, 1.0, 2.0, 4.0, 8.0}$, where the next value is double the previous value.
+The results on the information of the current symbol in the message and the reported file entropy at each step in the coding process are
+present in figure \ref{fig:results-alpha}, for file \verb|chry.txt|.
+For file \verb|othello.txt|, the results are in figure \ref{fig:results-alpha-other}.
 
 \begin{figure}
     \begin{subfigure}[b]{0.3\textwidth}
@@ -181,9 +193,71 @@ This trade-off between $\alpha$ and the reported information, especially regardi
         \caption{$\alpha = 8.0$}
         \label{fig:results-alpha-8.0}
     \end{subfigure}
-    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy.}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the $\alpha$ parameter on \verb|chry.txt|.}
     \label{fig:results-alpha}
 \end{figure}
+
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_0.25_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 0.25$}
+        \label{fig:results-alpha-other-0.25}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_0.5_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 0.5$}
+        \label{fig:results-alpha-other-0.5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 1.0$}
+        \label{fig:results-alpha-other-1.0}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_2.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 2.0$}
+        \label{fig:results-alpha-other-2.0}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_4.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 4.0$}
+        \label{fig:results-alpha-other-4.0}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_8.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 8.0$}
+        \label{fig:results-alpha-other-8.0}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the $\alpha$ parameter on \verb|othello.txt|.}
+    \label{fig:results-alpha-other}
+\end{figure}
+
+From the graphs, we can notice that for $\alpha < 1.0$ the behavior of the model is drastically different, in subfigures \ref{fig:results-alpha-0.25}, \ref{fig:results-alpha-0.5}, \ref{fig:results-alpha-0.25-other} and \ref{fig:results-alpha-0.5-other}.
+For \verb|chry.txt|, when $\alpha = 0.5$ the reported entropy in the middle of the file is considerably greater than when $\alpha = 0.25$, although the final reported entropy is the same.
+Additionally, the reported information at the last steps is extremely low when compared with the symbol information in previous steps, which means a very good prediction was being performed.
+However, we couldn't draw an explanation for why this is the case, since in the implementation the \verb|double| storage is used for $\alpha$ in the whole program and the prediction probability formula doesn't hint at a major difference in reported values when $\alpha < 1.0$.
+
+When $\alpha >= 1.0$ in \verb|chry.txt|, the difference between runs can be seen on the reported information, especially in the middle of the processing, where the reported symbol information is lower when predicting if $\alpha$ is closer to 1.
+This makes sense, since the prediction probability is less smoothed and thus is allowed to reach higher values, which in turn results in reporting less information when the predictions are correct.
+However, it is also expected that as $\alpha$ increases, less information is reported when the prediction fails, but this is less clearly seen in the plots.
+
+Another observation is that, as $\alpha$ increases, the entropy within steps $1.5\times10^7$ and $2.0\times10^7$.
 
 \subsection{Base probability distribution}
 
@@ -216,7 +290,25 @@ Therefore, we don't disregard the possibility that the assumption of the distrib
 
 \subsubsection{Results}
 
-\dots
+\begin{figure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_4.0_u_m_[f:6,].png}
+        \end{center}
+        \caption{Uniform distribution.}
+        \label{fig:results-distribution-uniform}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_8.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{Frequency distribution.}
+        \label{fig:results-distribution-frequency}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the base distribution.}
+    \label{fig:results-distribution}
+\end{figure}
 
 \subsection{Copy pointer repositioning strategy}
 
@@ -328,6 +420,10 @@ The second parameter is to allow all lowercase characters to be generated, this 
 
 \subsection{Results}
 
+To better understand the Generator module and how different initial string, witch is our K and the parameters influence
+text generation, the Generator module was trained with "othello.txt" wich is a very large text, varying initial string and the parameters, but
+maintaining the seed value of 123, with an output limit size of 10 000 characters.
+All the generated texts can be seen below
 
 Results for the text generator without -l or -t parameters:
 
@@ -590,11 +686,40 @@ inaaDnr nuI'oWanulo
 ----------------------------------------------------------
 \end{lstlisting}
 
-    
-    
-
 \section{Conclusion}
 \label{sec:conclusion}
+
+% TODO VERIFICAR ESTA INTRO
+From the development of this project, it was possible to conclude that the Copy
+Model is a successful and effective model to store occurrences of events after certain contexts
+and to allow the calculation of probabilities of these events happening. In turn, this allows
+the generation of new text based on training examples and on the information that the
+model provides.
+
+\subsection{Copy Model}
+
+\subsection{CPM_gen}
+
+
+By looking at the result we can conclude that the initial string, wich is our K is the parameters that influences most our results.
+This appens because a too small K it will generate thigs that doesnt make sense, and a very large K will reduce the amout of entries 
+in the Hash Table wich will lead to more guesses. The initial string should also take into account the language of the training file,
+and should contain normal words, not names or a special words. 
+
+The training file should be as large as possible, to have the most accurate model possible. Because as bigger the file the more 
+information we have in the Hash Table and to calculate the probabilities of the next symbol.
+
+The -l parameter allows the generator to generate a text with only lower case letters, and is better overall and great for smaller input texts. 
+The reason behind this is that the Hash Table will have less entries, and the probabilities will be more accurate.
+
+The -t parameter allows the generator to train himself, and it lowers the number os guesses, but at the cost of that guess could not make sense,
+and then it will make the same error again. This parameter is better for larger input texts, because it will have more entries in the Hash Table,
+and therefore decreasing the number of guesses and increasing the accuracy of the probabilities.
+
+Using the double parameters ...
+
+Also to denote that as the smaller the initial string, the most time it takes to produce an output, due to the size of each entry of 
+the Hash Table increassing with the as the initial string size decreases. 
 
 
 \section{References}

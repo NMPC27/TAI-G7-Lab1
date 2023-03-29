@@ -37,25 +37,27 @@ Or run the bash script run.sh:
 ./run.sh -k <k> <file> [OPTIONS]
 ```
 
+```
 Options:
         -h              Show this help message
         -v V            Additional output (verbose modes output the probability distribution at each encoding step):
                                 h - Human-readable verbose output, color-coded depending on whether a hit/miss/guess occurred
                                 m - Machine-readable verbose output, without color-coding and minimal flair (CSV format with header)
                                 p - Print the progress of processing the sequence
-        -k K            Size of the sliding window (default: 4)
-        -a A            Smoothing parameter alpha for the prediction probability (default: 0.1)
+        -k K            Size of the sliding window (default: 12)
+        -a A            Smoothing parameter alpha for the prediction probability (default: 1.0)
         -p P            Probability distribution of the characters other than the one being predicted (default: f):
                                 u - uniform distribution
                                 f - distribution based on the symbols' relative frequencies
-        -r R            Copy pointer reposition (default: o):
+        -r R            Copy pointer reposition (default: m):
                                 o - oldest
                                 n - newer
                                 m - most common prediction among all pointers
-        -t T            Threshold for copy pointer switch (default: n:0.50):
+        -t T            Threshold for copy pointer switch (default: f:6):
                                 n:X - static probability below X
                                 f:X - number of successive fails above X
                                 c:X - absolute value of the negative derivative of the prediction probability above X
+```
 
 ### `cpm_gen`
 

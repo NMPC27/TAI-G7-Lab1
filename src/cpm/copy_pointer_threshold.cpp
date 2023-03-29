@@ -15,7 +15,7 @@ bool DerivativeCopyPointerThreshold::surpassedThreshold(double hit_probability) 
 
     double derivative = hit_probability - previous_hit_probability;
     previous_hit_probability = hit_probability;
-    return derivative < derivative_threshold;
+    return derivative < - derivative_threshold;
 }
 
 void DerivativeCopyPointerThreshold::reset() {
