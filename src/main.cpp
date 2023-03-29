@@ -21,15 +21,25 @@ using namespace std;
 #define POINTER_THRESHOLD_MASK_DERIVATIVE 2
 #define POINTER_THRESHOLD_MASK_SUCCESSIVE_FAILS 4
 
+/**
+ *  \file main.cpp (implementation file)
+ *
+ *  \brief Lab1: CPM.
+ *
+ *  This file instantiates the CPM model and runs it.
+ * 
+ *  \author Pedro Lima 97860 && Nuno Cunha 98124 && Martinho Tavares 98262
+ */
 
 int main(int argc, char** argv) {
 
     chrono::steady_clock sc;   // create an object of `steady_clock` class
     auto start = sc.now();     // start timer
 
+    // Default values
     int c;
-    int k = 4;
-    double alpha = 0.1;
+    int k = 12;
+    double alpha = 1.0;
     enum VerboseMode{human, machine, progress, none} verbose_mode = VerboseMode::none;
     ReadingStrategy* reading_strategy = nullptr;
     CopyPointerThreshold* pointer_thresholds[POINTER_THRESHOLD_MAX_NUMBER];
@@ -38,13 +48,19 @@ int main(int argc, char** argv) {
     CopyPointerManager* pointer_manager = nullptr;
     BaseDistribution* base_distribution = nullptr;
 
+    // Parse command line arguments
     while ((c = getopt(argc, argv, "hv:bk:a:p:r:t:")) != -1){
         switch(c){
+            // Help
             case 'h':
                 printUsage(argv[0]);
                 printOptions();
                 return 0;
-
+            /* Verbose mode
+             * h: human
+             * m: machine
+             * p: progress
+            */ 
             case 'v':
                 switch (optarg[0]) {
                     case 'h':
@@ -62,14 +78,17 @@ int main(int argc, char** argv) {
                 }
                 break;
             
+            // K (size of the pattern)
             case 'k':
                 k = stoi(optarg);
                 break;
 
+            // Alpha (smoothing factor)
             case 'a':
                 alpha = stof(optarg);
                 break;
 
+            // base distribution : u (uniform) or f (frequency)
             case 'p':
                 if (optarg[0] == 'u') {
                     base_distribution = new UniformDistribution(); 
@@ -81,6 +100,13 @@ int main(int argc, char** argv) {
                 }
                 break;
 
+            /*Pointer manager options
+
+            o: next oldest pointer
+            n: recent pointer
+            m: most common pointer
+            c:X circular array with X elements and most common pointer strategy
+            */
             case 'r':
                 {
                 string optarg_string = string(optarg);
@@ -110,7 +136,13 @@ int main(int argc, char** argv) {
                 }
                 }
                 break;
-                
+            
+            /* Pointer Threshold
+            
+            n:X static threshold with value X
+            f:X successive fails threshold with value X
+            c:X derivative threshold with value X
+            */
             case 't':
                 {
                     string optarg_string = string(optarg);
@@ -132,6 +164,7 @@ int main(int argc, char** argv) {
                         pointer_thresholds[pointer_threshold_number] = new StaticCopyPointerThreshold(threshold_value);
                         pointer_threshold_number++;
                         pointer_threshold_mask |= POINTER_THRESHOLD_MASK_STATIC;
+                        
                     } else if (opt == "f") {
                         if (pointer_threshold_mask & POINTER_THRESHOLD_MASK_SUCCESSIVE_FAILS) {
                             cout << "Error: mode '" << opt << "' for option '-t' was specified more than once (repeated value '" << optarg << "')" << endl;
@@ -142,11 +175,10 @@ int main(int argc, char** argv) {
                             pointer_thresholds[pointer_threshold_number] = new SuccessFailsCopyPointerThreshold(threshold_value);
                             pointer_threshold_number++;
                             pointer_threshold_mask |= POINTER_THRESHOLD_MASK_SUCCESSIVE_FAILS;
-                        }else{
+                        } else {
                             cout << "Error: invalid option for '-t f:X' (" << optarg << ")" << endl;
                             return 1;
                         }
-                        //cout << "Error: '-t f:X' option currently not supported" << endl;
                         
                     } else if (opt == "c") {
                         if (pointer_threshold_mask & POINTER_THRESHOLD_MASK_DERIVATIVE) {
@@ -179,12 +211,13 @@ int main(int argc, char** argv) {
     // Defaults
     if (reading_strategy == nullptr) reading_strategy = new InMemoryReadingStrategy();
     if (pointer_threshold_number == 0) {
-        pointer_thresholds[pointer_threshold_number] = new StaticCopyPointerThreshold(0.5);
+        pointer_thresholds[pointer_threshold_number] = new SuccessFailsCopyPointerThreshold(6);
         pointer_threshold_number++;
     }
-    if (pointer_manager == nullptr) pointer_manager = new NextOldestCopyPointerManager();
+    if (pointer_manager == nullptr) pointer_manager = new MostCommonCopyPointerManager();
     if (base_distribution == nullptr) base_distribution = new FrequencyDistribution();
 
+    // Copy model initialization
     CopyModel model = CopyModel(k, alpha, reading_strategy, pointer_thresholds, pointer_threshold_number, pointer_manager, base_distribution);
 
     string file_name = string(argv[optind]);
@@ -196,26 +229,35 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // First pass of the file to compute the base distribution
     model.firstPass(file_name);
 
     map<char, double> information_sums;
 
+    // Initialize the first k-pattern with the most frequent symbol
     model.initializeWithMostFrequent();
 
     if (verbose_mode == VerboseMode::machine)
         outputProbabilityDistributionCSVheader();
 
+    // Loop for prediction through the file
     while (!model.eof()) {
+
+        // Register the current pattern and check if it has been seen before
         bool pattern_has_past = model.registerPattern();
+        // Check if the model can predict the next symbol
         bool can_predict = model.predictionSetup(pattern_has_past);
 
         int output_color_condition = can_predict ? 1 : 0;
+        // If the model can predict, then predict and check if the prediction was correct
         if (can_predict) {
             bool hit = model.predict();
             output_color_condition += hit ? 1 : 0;
+        // If the model can't predict, then guess
         } else {
             model.guess();
         }
+        // Advance the positions of the current pointer, as well as the current pattern, and the copy pointer
         model.advance();
 
         // The probability distribution that the model provides doesn't account for whether or not the current prediction was a success,
@@ -314,16 +356,16 @@ void printOptions() {
     cout << "\t\t\t\th - Human-readable verbose output, color-coded depending on whether a hit/miss/guess occurred" << endl;
     cout << "\t\t\t\tm - Machine-readable verbose output, without color-coding and minimal flair (CSV format with header)" << endl;
     cout << "\t\t\t\tp - Print the progress of processing the sequence" << endl;
-    cout << "\t-k K\t\tSize of the sliding window (default: 4)" << endl;
-    cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 0.1)" << endl;
+    cout << "\t-k K\t\tSize of the sliding window (default: 12)" << endl;
+    cout << "\t-a A\t\tSmoothing parameter alpha for the prediction probability (default: 1.0)" << endl;
     cout << "\t-p P\t\tProbability distribution of the characters other than the one being predicted (default: f):" << endl;
     cout << "\t\t\t\tu - uniform distribution" << endl;
     cout << "\t\t\t\tf - distribution based on the symbols' relative frequencies" << endl;
-    cout << "\t-r R\t\tCopy pointer reposition (default: o):" << endl;
+    cout << "\t-r R\t\tCopy pointer reposition (default: m):" << endl;
     cout << "\t\t\t\to - oldest" << endl;
     cout << "\t\t\t\tn - newer" << endl;
     cout << "\t\t\t\tm - most common prediction among all pointers" << endl;
-    cout << "\t-t T\t\tThreshold for copy pointer switch (default: n:0.50):" << endl;
+    cout << "\t-t T\t\tThreshold for copy pointer switch (default: f:6):" << endl;
     cout << "\t\t\t\tn:X - static probability below X" << endl;
     cout << "\t\t\t\tf:X - number of successive fails above X" << endl; //! temos de ver que o numero faz sentido
     cout << "\t\t\t\tc:X - absolute value of the negative derivative of the prediction probability above X" << endl;

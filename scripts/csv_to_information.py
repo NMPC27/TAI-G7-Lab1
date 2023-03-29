@@ -57,7 +57,6 @@ def process_and_save_information_and_entropy(main_file_name: str):
     processed_information_file_path = f'./processed/{results_file_path_without_extension}_information.npy'
     processed_entropy_file_path = f'./processed/{results_file_path_without_extension}_entropy.npy'
 
-
     max_number_of_characters = get_approximate_byte_count(source_file_path)
 
     print('Calculating...')
