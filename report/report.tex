@@ -94,7 +94,7 @@ With this value in mind, we evaluated the model as a whole with different values
 The files chosen for testing are present in the repository\footnote{\url{https://github.com/NMPC27/TAI-G7-Lab1}}, and they have the following baselines:
 \begin{itemize}
     \item \verb|chry.txt|: 1.9652 bits
-    \item \verb|...|: \dots
+    \item \verb|othello.txt|: 4.63303 bits
 \end{itemize}
 
 Throughout this section, the different program parameters are detailed, and their effect on the model's performance, both in terms of execution time and quality of the results, is studied.
@@ -134,7 +134,56 @@ This trade-off between $\alpha$ and the reported information, especially regardi
 
 \subsubsection{Results}
 
-\dots
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_0.25_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 0.25$}
+        \label{fig:results-alpha-0.25}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_0.5_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 0.5$}
+        \label{fig:results-alpha-0.5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 1.0$}
+        \label{fig:results-alpha-1.0}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_2.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 2.0$}
+        \label{fig:results-alpha-2.0}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_4.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 4.0$}
+        \label{fig:results-alpha-4.0}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_8.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{$\alpha = 8.0$}
+        \label{fig:results-alpha-8.0}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy.}
+    \label{fig:results-alpha}
+\end{figure}
 
 \subsection{Base probability distribution}
 
@@ -200,7 +249,6 @@ This can not only take into account the locality that the file's content may hav
 \subsubsection{Results}
 
 \begin{figure}
-
     \begin{subfigure}[b]{0.3\textwidth}
         \begin{center}
             \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_n_[f:6,].png}
