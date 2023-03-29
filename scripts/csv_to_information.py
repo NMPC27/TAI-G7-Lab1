@@ -19,19 +19,19 @@ def get_approximate_byte_count(file_name: str) -> int:
 def get_information(file_name: str, max_size: int) -> np.ndarray:
     information_steps: np.ndarray = np.empty((max_size, 1), dtype=np.float32)
 
-    with gzip.open(file_name, 'rt') as f:
+    with gzip.open(file_name, 'rb') as f:
         f.readline()    # skip header
         for i, line in enumerate(f):
             line = line[:-1]    # remove newline
             
-            spl = line.split(',')
+            spl = line.split(b',')
             # If this happens, then we are likely at the end of the file, quit
             if len(spl) != 4:
                 break
 
             _, actual, _, distribution_whole = spl
 
-            distribution_strings = distribution_whole.split(':')
+            distribution_strings = distribution_whole.split(b':')
             symbol_probability = float(distribution_strings[distribution_strings.index(actual) + 1])
             information_steps[i] = -log2(symbol_probability)
             
