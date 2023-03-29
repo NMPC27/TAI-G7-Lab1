@@ -340,7 +340,7 @@ void outputProbabilityDistributionCSVheader() {
 void outputProbabilityDistributionCSVbody(char prediction, char actual, double hit_probability, map<char, double> distribution) {
     cout << prediction << "," << actual << "," << hit_probability << ",";
     for (auto pair : distribution) {
-        cout << pair.first << ":" << pair.second << ":";
+        cout << pair.first << "\t" << pair.second << "\t";
     }
     cout << endl;
 }

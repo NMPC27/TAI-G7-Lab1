@@ -28,13 +28,13 @@ The generated binaries, both cpm and cpm_gen will be present in the `bin` folder
 To use the copy model, run:
 
 ```
-./bin/cpm -k <k> <file> [OPTIONS]
+./bin/cpm [OPTIONS] <file>
 ```
 
-Or run the bash script run.sh: 
+Or run the bash script run.sh, which also already compiles the program if the `build` folder exists:
 
 ```
-./run.sh -k <k> <file> [OPTIONS]
+./run.sh [OPTIONS] <file>
 ```
 
 ```
@@ -66,10 +66,12 @@ To use the copy model, run:
 ```
 ./bin/cpm_gen -s 'string inicial' -f train_file.txt -n num_caracteres_a_gerar [OPTIONS]
 ```
+```
 Options:
   -h  help
   -t  (allow training himself)
   -l  (allow only lower case letters - better for smaller input texts)
+```
 
 ## Example runs
 

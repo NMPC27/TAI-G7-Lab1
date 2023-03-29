@@ -100,13 +100,15 @@ With this value in mind, we evaluated the model as a whole with different values
 The files chosen for testing are present in the repository\footnote{\url{https://github.com/NMPC27/TAI-G7-Lab1}}, and they have the following baselines:
 \begin{itemize}
     \item \verb|chry.txt|: 1.9652 bits
-    \item \verb|othello.txt|: 4.63303 bits
+    \item \verb|othello.txt|: 4.44629 bits
 \end{itemize}
 
 Throughout this section, the different program parameters are detailed, and their effect on the model's performance, both in terms of execution time and quality of the results, is studied.
 To analyze the effect of a parameter $l$, the copy model is run with different values for $l$ while keeping all other parameters with the default values.
 
-For the results regarding the information content of the symbols throughout the \verb|chry.txt| file, the data was transformed with a low-pass filter using a moving average, since there are too many data points.
+For the results regarding the information content of the symbols throughout the \verb|chry.txt| and \verb|othello.txt| files, the data was transformed with a low-pass filter using a moving average with window size of 10000 and 100 samples respectively, since the data exhibited a very large frequency.
+Additionally, the file \verb|othello.txt| was altered to not include newlines or commas, which were respectively replaced by spaces and semicolons.
+These were complicating posterior data analysis due to how the model's results are saved to disk, which use the verbose machine mode described in section \ref{sec:copy-model-verbose}.
 
 \subsection{Pattern size}
 
@@ -193,7 +195,7 @@ For file \verb|othello.txt|, the results are in figure \ref{fig:results-alpha-ot
         \caption{$\alpha = 8.0$}
         \label{fig:results-alpha-8.0}
     \end{subfigure}
-    \caption{Information of the current symbol and entropy as the file is processed, varying the $\alpha$ parameter on \verb|chry.txt|.}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the $\alpha$ parameter on ``chry.txt''.}
     \label{fig:results-alpha}
 \end{figure}
 
@@ -244,7 +246,7 @@ For file \verb|othello.txt|, the results are in figure \ref{fig:results-alpha-ot
         \caption{$\alpha = 8.0$}
         \label{fig:results-alpha-other-8.0}
     \end{subfigure}
-    \caption{Information of the current symbol and entropy as the file is processed, varying the $\alpha$ parameter on \verb|othello.txt|.}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the $\alpha$ parameter on ``othello.txt''.}
     \label{fig:results-alpha-other}
 \end{figure}
 
@@ -290,10 +292,12 @@ Therefore, we don't disregard the possibility that the assumption of the distrib
 
 \subsubsection{Results}
 
+Figures \ref{fig:results-distribution} and \ref{fig:results-distribution-other} show the symbol information and entropy throughout the processing of both test files, when using either the uniform or frequency distribution.
+
 \begin{figure}
     \begin{subfigure}[b]{0.45\textwidth}
         \begin{center}
-            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_4.0_u_m_[f:6,].png}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_u_m_[f:6,].png}
         \end{center}
         \caption{Uniform distribution.}
         \label{fig:results-distribution-uniform}
@@ -301,14 +305,46 @@ Therefore, we don't disregard the possibility that the assumption of the distrib
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
         \begin{center}
-            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_8.0_f_m_[f:6,].png}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:6,].png}
         \end{center}
         \caption{Frequency distribution.}
         \label{fig:results-distribution-frequency}
     \end{subfigure}
-    \caption{Information of the current symbol and entropy as the file is processed, varying the base distribution.}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the base distribution on ``chry.txt''.}
     \label{fig:results-distribution}
 \end{figure}
+
+\begin{figure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_u_m_[f:6,].png}
+        \end{center}
+        \caption{Uniform distribution.}
+        \label{fig:results-distribution-other-uniform}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{Frequency distribution.}
+        \label{fig:results-distribution-other-frequency}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the base distribution on ``othello.txt''.}
+    \label{fig:results-distribution-other}
+\end{figure}
+
+For \verb|chry.txt|, the effect of the distributions is minimal, but noticeable.
+More specifically, the frequency distribution exhibited a lower and more stable entropy value throughout the file.
+In terms of symbol information, the runs with the uniform distribution presented very similar values of information when predictions fail (data points above 2 bits), while for those with the frequency distribution the information values on failed predictions are more irregular throughout the file.
+This is due to the fact that the frequency distribution assigns for each symbol of the alphabet a different probability by default, relative to the symbol's frequency in the whole file, and so different values are provided throughout the file which model the symbol's appearance in the file's contents.
+
+For \verb|othello.txt|, however, the frequency distribution provided much better entropy.
+The effect of this distribution is more pronounced in \verb|othello.txt| since the size of the alphabet is larger and the probability of occurrence between symbols is greatly skewed, as in the english alphabet there are characters that appear much more often than others.
+The uniform distribution didn't take this into account, and thus reported larger values for the entropy.
+One unexplained detail, however, is how for the run using the frequency distribution the reported entropy in the first few steps is abnormally high.
+
+As such, the previously mentioned possibility that the frequency distribution may also hurt model performance was not found in these results.
 
 \subsection{Copy pointer repositioning strategy}
 
@@ -340,6 +376,8 @@ This can not only take into account the locality that the file's content may hav
 
 \subsubsection{Results}
 
+Figures \ref{fig:results-reposition} and \ref{fig:results-reposition-other} show the results for the symbol information and entropy throughout both files.
+
 \begin{figure}
     \begin{subfigure}[b]{0.3\textwidth}
         \begin{center}
@@ -368,6 +406,34 @@ This can not only take into account the locality that the file's content may hav
     \label{fig:results-reposition}
 \end{figure}
 
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_n_[f:6,].png}
+        \end{center}
+        \caption{Oldest pointer first.}
+        \label{fig:results-reposition-other-n}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_o_[f:6,].png}
+        \end{center}
+        \caption{Newest pointer first.}
+        \label{fig:results-reposition-other-o}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{Most common prediction.}
+        \label{fig:results-reposition-other-m}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy.}
+    \label{fig:results-reposition-other}
+\end{figure}
+
 \subsection{Copy pointer reposition threshold}
 
 A copy pointer is used until the predictions are deemed to not be worthwhile.
@@ -393,6 +459,7 @@ After determining the best performing threshold values for each approach, they w
 \dots
 
 \subsection{Verbose output}
+\label{sec:copy-model-verbose}
 
 As a sidenote, the model offers the possibility of outputting the probability distributions and predicitons at each step, or of presenting the overall progress of processing the input file.
 
@@ -408,7 +475,7 @@ This module uses a Context Model calculated from a received text to calculate th
 next characters based on a context phrase. 
 
 It contains two main methods, the \verb|firstPass()|, that reads the training file and makes an initial pass through the text to calculate the frequencies of the characters.
-This method also makes an context model based on the training file, and the size of the context is defined by the input string. 
+This method also makes a context model based on the training file, and the size of the context is defined by the input string. 
 
 The \verb|cpm_gen()| method uses the context model in the first pass to generate the text.
 When we try to generate the next symbol, we read the current context, which is the size of the input string and we check the context model for that context. If we have that context in the model, we get the list of possible next symbols, and their counts. Then, we generate a random value between 0 and the sum of the counts, and we check where that value lands between all the ranges of counts of events of that context. The symbol that is in the range of the random value is the next symbol of the text.
@@ -434,7 +501,7 @@ Listing 1: Generator output for train file "othello.txt" with initial string "T"
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Houllo m  oue he plled th So taby t want,   ke tirrad:
+An atim Lobewast t ile: Ohincishy'diseapon'treanne s b'tcrod (mes howintene Wim
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -443,7 +510,7 @@ Listing 2: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-I the my And him, Iager'd and th
+I lour laight, lou sle orts soper shenle,
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -452,7 +519,7 @@ Listing 3: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Canitiall with Office. But that Cassio's see spokes.
+She the despeake ship my
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -461,7 +528,7 @@ Listing 4: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Othello's Let to obey too much a round it, I thinke.
+The Token Wensday most the Moone you know:
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -470,33 +537,29 @@ Listing 5: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-I would them. And yet went busie must be Iago. Liue Rodo. 
-With this?
+Enter Iago? Othe. What common his deluding her fantasie,
 ----------------------------------------------------------
 \end{lstlisting}
 
 Listing 6: Generator output for train file "othello.txt" with initial string "The te" and without -l or -t parameters
-\\Num guesses: 165
+\\Num guesses: 590
 
 \begin{lstlisting}
 ----------------------------------------------------------
-And marke how he comes to make a word or two before 
-apprehend her faire Island,
+For if such tricke vpon the error of this
 
-Dc dHmr i aeihe, ooeelde smgimfpwi ? 
+fo' ofalMahetse n hrtuifo ie oeigmn   odeas' ) mHoe i i, 'lIt reodese:.se
 ----------------------------------------------------------
 \end{lstlisting}
 
 Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and without -l or -t parameters
-\\Num guesses: 8 311
+\\Num guesses: 2 604
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Do'st thou hast no name the Instruments summon to supper 
-time
+all these Men, they do not, I do beseech you,
 
-hatw,es  eegpa  rdlia vlnanrias in o ry ESowmn b syess g 
-lant nero ue 
+fo' ofalMahetse n hrtuifo ie oeigmn   odeas' ) mHoe i i, 'lIt reodese:.se
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -505,7 +568,7 @@ Listing 8: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-one en,eLmosiuhnunrgtlveecm.n .aulebalom hdrd
+doanelslhrCIh ieaY oo i yhnA:aBmygae
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -521,8 +584,7 @@ Listing 1: Generator output for train file "othello.txt" with initial string "T"
 
 \begin{lstlisting}
 ----------------------------------------------------------
-e, t t fllfod is pe ale mout thort g ld da meli s area 
-vperd
+win sss'd yousd   kecer hete, abeeaurugotieuthe y gr wine anem
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -531,7 +593,7 @@ Listing 2: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-dosto th torieuers: and fat cryther so yet so:
+thery prod sh me growelfe ore toponio.
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -540,8 +602,7 @@ Listing 3: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-and timentena some rod. if that now he drunke more ete. 
-lord?
+iago. and or pray yon. well'd be his drunke motifie sea
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -550,8 +611,7 @@ Listing 4: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-my wife: i would nothinkings. what i will men othello, 
-take thy awl'd thing.
+you commited, and questie too hard wise: follow high. (prythee: an of a guilty th' confus'd,
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -560,8 +620,8 @@ Listing 5: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-rodo. patience. let's go safely by breake no iago. 'faith 
-one cases,
+cassio. aunciant, be abus'd: exclaimed. are about me filles vs a most graue.
+ she speake heauen forget moe tapers.
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -570,32 +630,27 @@ Listing 6: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-why stand i loue be now to dyet my lippes: is't you cassio 
-be receiu'd her father,
+and made of the bride, and easie taskes.
 ----------------------------------------------------------
 \end{lstlisting}
 
 Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and with -l parameter
-\\Num guesses: 7 899
+\\Num guesses: 2 191
 
 \begin{lstlisting}
 ----------------------------------------------------------
-that i can discourse. which they iumpe not one, that 
-sweete othello?
+make it a darling, like death, and her husband?
 
-wuo og,ahwolseh.eu afet hfmgath saegnnr hisdsdhaaiin
+hr' ohdnadietse n istulho lh oelhnn   oeebt' ) naog i i, 'mat reoehsg:.sg
 ----------------------------------------------------------
 \end{lstlisting}
 
 Listing 8: Generator output for train file "othello.txt" with initial string "The test" and with -l parameter
-\\Num guesses: 9 229
+\\Num guesses: 10 000
 
 \begin{lstlisting}
 ----------------------------------------------------------
-mus. i marry. what? a custome: but in a man that latest, 
-which not enriches him,
-
-tt oitdi ?w,ehyas a lw n rhge hayo
+wi:  esmlen,ntd,  bri , so. eo e,alerc armeeiohitsdcslbo,isodt g ittus lhitw eh are eori.h he?
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -611,7 +666,7 @@ Listing 1: Generator output for train file "othello.txt" with initial string "T"
 
 \begin{lstlisting}
 ----------------------------------------------------------
-So Ieread atle m bo. wathin o. Lino Whe Ansois. tes sh.
+Geee mey atoountineenet: Hat he Tuengo. Cat agagngile onifouph m y te, werellas te
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -620,7 +675,7 @@ Listing 2: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-We sioneues, makendinget want hon and, youry her.
+Othe nand he sh your Lore Beat inke dere onclonge cozent,
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -629,8 +684,7 @@ Listing 3: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Iago. Why Minuation, that pray you know is Tempt is liues 
-of it same
+For lood my liue dingry. Thou haue State such my how I am do aboue lip:
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -639,8 +693,8 @@ Listing 4: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Exit Cas. I will you go with loue alread Rod. What breaken 
-of Maine:
+When haue was high. Haue you; a which, and adie: and sold not man haue that forcement 
+that is euill she heere enemy in
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -649,30 +703,30 @@ Listing 5: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Othello: heereafter more next night, or his faire him at 
-your Daughter
+When haue was high. Haue you; a which, and adie:
+ and sold not man haue that forcement that is euill she heere enemy in
 ----------------------------------------------------------
 \end{lstlisting}
 
 Listing 6: Generator output for train file "othello.txt" with initial string "The te" and with -t parameter
-\\Num guesses: 34
+\\Num guesses: 319
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Des. It is now a huge Eclipse
+Iago. You shall play the palme: I, well in Spleene,
 
-a d sia r io a proper man: Oh, my face 
+dvdr bo'WliuaoS o( toy iyol  l dai Cdri  inc snuhmto h 
 ----------------------------------------------------------
 \end{lstlisting}
 
 Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and with -t parameter
-\\Num guesses: 6 533
+\\Num guesses: 7 548
 
 \begin{lstlisting}
 ----------------------------------------------------------
-How he vpbraides Iago, Attendants, with leade direction.
+The Iustice of the place againe.
 
-mpo gu hsees w?u a sfeesrso  hsnesatlAghhoif
+to  oe aa rhFa   ed v.otg n?- aes uu
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -681,8 +735,86 @@ Listing 8: Generator output for train file "othello.txt" with initial string "Th
 
 \begin{lstlisting}
 ----------------------------------------------------------
-s:cieBgt kofhb  afgeerarHlyuhm.rlwuy.ett u tihlA mmr'
-inaaDnr nuI'oWanulo
+eCLtmetakirayetotF eelt)nhc reioneeol s o tetmrt.dse u
+----------------------------------------------------------
+\end{lstlisting}
+
+
+Results for the text generator with -t and -l parameters:
+
+
+\hfill
+
+Listing 1: Generator output for train file "othello.txt" with initial string "T" and with -t and -l parameters
+\\Num guesses: 0
+
+\begin{lstlisting}
+----------------------------------------------------------
+bandont ftey wewhellllazoou t bero t t mince iseerododof  anke cor
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 2: Generator output for train file "othello.txt" with initial string "Th" and with -t and -l parameters
+\\Num guesses: 0
+
+\begin{lstlisting}
+----------------------------------------------------------
+theerem be wit dood, why me my bassinesdeme
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 3: Generator output for train file "othello.txt" with initial string "The" and with -t and -l parameters
+\\Num guesses: 0
+
+\begin{lstlisting}
+----------------------------------------------------------
+iago. not isleepe to madeliuillainstrankes
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 4: Generator output for train file "othello.txt" with initial string "The " and with -t and -l parameters
+\\Num guesses: 0
+
+\begin{lstlisting}
+----------------------------------------------------------
+return'd againe to her grant the way. set it, and my sould he diuell.
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 5: Generator output for train file "othello.txt" with initial string "The t" and with -t and -l parameters
+\\Num guesses: 0
+
+\begin{lstlisting}
+----------------------------------------------------------
+at blood beene me by and her officer iago. you shall my husband
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 6: Generator output for train file "othello.txt" with initial string "The te" and with -t and -l parameters
+\\Num guesses: 0
+
+\begin{lstlisting}
+----------------------------------------------------------
+steep'd, to enflame it be true: or foredoes me without more the strongly to you:
+ for by this is othello, desdemon?
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and with -t and -l parameters
+\\Num guesses: 7 349
+
+\begin{lstlisting}
+----------------------------------------------------------
+e ,ulyirn et ai telott,tmnhel  n uoa  oor ydo   mofe   de.bowsaege ntdhoee 
+----------------------------------------------------------
+\end{lstlisting}
+
+Listing 8: Generator output for train file "othello.txt" with initial string "The test" and with -t and -l parameters
+\\Num guesses: 10 000
+
+\begin{lstlisting}
+----------------------------------------------------------
+easerh w : p ht tn-lyerlehm eos shn snsn ovssniro h  fanmdi'l
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -701,25 +833,28 @@ model provides.
 \subsection{CPM_gen}
 
 
-By looking at the result we can conclude that the initial string, wich is our K is the parameters that influences most our results.
-This appens because a too small K it will generate thigs that doesnt make sense, and a very large K will reduce the amout of entries 
-in the Hash Table wich will lead to more guesses. The initial string should also take into account the language of the training file,
-and should contain normal words, not names or a special words. 
+By looking at the results we can conclude that the initial string, which is our K, is the parameter that influences our results the most.
+This happens because a very small K generates words that don't make sense, and a very large K will reduce the amount of entries 
+in the Hash Table which will lead to more guesses. The initial string should also take into account the language of the training file,
+and should contain normal words, not names nor a special words. 
 
-The training file should be as large as possible, to have the most accurate model possible. Because as bigger the file the more 
-information we have in the Hash Table and to calculate the probabilities of the next symbol.
+The training file should be as large as possible, to have the most accurate model possible. Because the bigger the file, the more 
+information we have in the Hash Table to calculate the probabilities of the next symbol.
 
-The -l parameter allows the generator to generate a text with only lower case letters, and is better overall and great for smaller input texts. 
+The -l parameter allows the generator to generate a text with only lower case letters, and is better overall and great for smaller input texts,
+although it compromises the quality of the text generated due to being only lower case letters. 
 The reason behind this is that the Hash Table will have less entries, and the probabilities will be more accurate.
 
-The -t parameter allows the generator to train himself, and it lowers the number os guesses, but at the cost of that guess could not make sense,
+The -t parameter allows the generator to train itself, and it lowers the number of guesses, but at the cost of that guess not making sense,
 and then it will make the same error again. This parameter is better for larger input texts, because it will have more entries in the Hash Table,
 and therefore decreasing the number of guesses and increasing the accuracy of the probabilities.
 
-Using the double parameters ...
+Using the double parameters it behaves similarly to the -t parameter, but it will have less guesses and have a slightly better accuracy at generating text that makes sense.
+Although this small increase in accuracy is only noticeable in our results in the "The te" and "The tes" initial strings.
+This makes it a better option than the -t option alone but it compromises the quality of the text generated due to being only lower case letters.
 
-Also to denote that as the smaller the initial string, the most time it takes to produce an output, due to the size of each entry of 
-the Hash Table increassing with the as the initial string size decreases. 
+Also to denote that, the smaller the initial string, the more time it takes to produce an output, due to the size of each entry of 
+the Hash Table increasing as the initial string size decreases. 
 
 
 \section{References}

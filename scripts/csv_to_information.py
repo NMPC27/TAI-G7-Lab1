@@ -31,7 +31,7 @@ def get_information(file_name: str, max_size: int) -> np.ndarray:
 
             _, actual, _, distribution_whole = spl
 
-            distribution_strings = distribution_whole.split(b':')
+            distribution_strings = distribution_whole.split(b'\t')
             symbol_probability = float(distribution_strings[distribution_strings.index(actual) + 1])
             information_steps[i] = -log2(symbol_probability)
             
