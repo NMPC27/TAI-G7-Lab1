@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{csvsimple}
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -105,10 +106,28 @@ The files chosen for testing are present in the repository\footnote{\url{https:/
 
 Throughout this section, the different program parameters are detailed, and their effect on the model's performance, both in terms of execution time and quality of the results, is studied.
 To analyze the effect of a parameter $l$, the copy model is run with different values for $l$ while keeping all other parameters with the default values.
+Firstly, the final entropy and execution time is shown overall in section \ref{sec:copy-model-results}.
+In the following sections, each parameter is described, and their effects on the model performance are studied.
 
 For the results regarding the information content of the symbols throughout the \verb|chry.txt| and \verb|othello.txt| files, the data was transformed with a low-pass filter using a moving average with window size of 10000 and 100 samples respectively, since the data exhibited a very large frequency.
 Additionally, the file \verb|othello.txt| was altered to not include newlines or commas, which were respectively replaced by spaces and semicolons.
 These were complicating posterior data analysis due to how the model's results are saved to disk, which use the verbose machine mode described in section \ref{sec:copy-model-verbose}.
+
+\subsection{Overall results}
+\label{sec:copy-model-results}
+
+% TODO: adicionar resto do info à tabela abaixo e adicionar tabela para o othello
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/all_res_chry.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results} Entropy and execution time for every configuration.}
+\end{table}
 
 \subsection{Pattern size}
 
@@ -250,8 +269,8 @@ For file \verb|othello.txt|, the results are in figure \ref{fig:results-alpha-ot
     \label{fig:results-alpha-other}
 \end{figure}
 
-From the graphs, we can notice that for $\alpha < 1.0$ the behavior of the model is drastically different, in subfigures \ref{fig:results-alpha-0.25}, \ref{fig:results-alpha-0.5}, \ref{fig:results-alpha-0.25-other} and \ref{fig:results-alpha-0.5-other}.
-For \verb|chry.txt|, when $\alpha = 0.5$ the reported entropy in the middle of the file is considerably greater than when $\alpha = 0.25$, although the final reported entropy is the same.
+From the graphs, we can notice that for $\alpha < 1.0$ in the \verb|chry.txt| file the behavior of the model is drastically different, in subfigures \ref{fig:results-alpha-0.25} and \ref{fig:results-alpha-0.5}.
+When $\alpha = 0.5$ the reported entropy in the middle of the file is considerably greater than when $\alpha = 0.25$, although the final reported entropy is the same.
 Additionally, the reported information at the last steps is extremely low when compared with the symbol information in previous steps, which means a very good prediction was being performed.
 However, we couldn't draw an explanation for why this is the case, since in the implementation the \verb|double| storage is used for $\alpha$ in the whole program and the prediction probability formula doesn't hint at a major difference in reported values when $\alpha < 1.0$.
 
@@ -259,7 +278,12 @@ When $\alpha >= 1.0$ in \verb|chry.txt|, the difference between runs can be seen
 This makes sense, since the prediction probability is less smoothed and thus is allowed to reach higher values, which in turn results in reporting less information when the predictions are correct.
 However, it is also expected that as $\alpha$ increases, less information is reported when the prediction fails, but this is less clearly seen in the plots.
 
-Another observation is that, as $\alpha$ increases, the entropy within steps $1.5\times10^7$ and $2.0\times10^7$.
+These latter conclusions can be drawn on the results of the \verb|othello.txt| file too for all $\alpha$.
+The larger the $\alpha$, the ``smoother'' the values of the current symbol information which tend to converge towards the entropy line.
+
+Another observation for \verb|chry.txt| is that, as $\alpha$ increases, the entropy within steps $1.5\times10^7$ and $2.0\times10^7$ decreases, forming a larger valley.
+One possible interpretation is that in this part of the file the model was more able to perform correct predictions, which resulted in more pronounced misses, as exhibited by the larger information spikes towards the end.
+As such, the prediction fails would report lesser information content with larger $\alpha$, which helped the model capitalize on the correct predictions better in this specific case.
 
 \subsection{Base probability distribution}
 
@@ -349,7 +373,7 @@ As such, the previously mentioned possibility that the frequency distribution ma
 \subsection{Copy pointer repositioning strategy}
 
 Different strategies can be followed when choosing a copy pointer from which to start copying.
-We developed 3 approaches, 2 of which being fairly simplistic:
+We developed 4 approaches, 2 of which being fairly simplistic:
 \begin{itemize}
     \item \textbf{Oldest pointer first}: the chosen copy pointer is the oldest possible. If the current copy pointer is repositioned because the threshold was met, then that pointer will be completely discarded and the next oldest pointer is used.
     This is the most simple approach, which assumes similar patterns are very far in the file;
@@ -481,14 +505,14 @@ The \verb|cpm_gen()| method uses the context model in the first pass to generate
 When we try to generate the next symbol, we read the current context, which is the size of the input string and we check the context model for that context. If we have that context in the model, we get the list of possible next symbols, and their counts. Then, we generate a random value between 0 and the sum of the counts, and we check where that value lands between all the ranges of counts of events of that context. The symbol that is in the range of the random value is the next symbol of the text.
 If we don't have that context in the model, we get the list of all possible symbols in the alphabet, and their distribution, and we generate a random value between 0 and the sum of the distributions, and we check where that value lands between all the ranges of distributions of events of that context. The symbol that is in the range of the random value is the next symbol of the text. 
 
-We also have 2 other input parameters that modify the behavior of the generator. The first one is allowing the model to train itself, while generating the text. This is done by updating the context model with the generated text and the distibution of symbols in the alphabet.
+We also have 2 other input parameters that modify the behavior of the generator. The first one is allowing the model to train itself, while generating the text. This is done by updating the context model with the generated text and the distribution of symbols in the alphabet.
 The second parameter is to allow all lowercase characters to be generated, this is done by converting all the characters to lowercase while reading the training file. This parameter provides a better context model without needing a big training file, but it also makes the text generated to be all lowercase.
 
 
 \subsection{Results}
 
-To better understand the Generator module and how different initial string, witch is our K and the parameters influence
-text generation, the Generator module was trained with "othello.txt" wich is a very large text, varying initial string and the parameters, but
+To better understand the Generator module and how different initial strings, which is our K and the parameters influence
+text generation, the Generator module was trained with "othello.txt" which is a very large text, varying the initial string and the parameters, but
 maintaining the seed value of 123, with an output limit size of 10 000 characters.
 All the generated texts can be seen below
 
