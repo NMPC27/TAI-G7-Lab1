@@ -15,7 +15,7 @@ for k in k_list:
         print('ERROR:'+ command)
 
 tf_list =[3,6,9]
-tc_list =[0.01,0.05]
+tc_list =[0.01,0.05,0.1]
 tn_list =[0.3,0.4,0.5]
 
 
