@@ -40,7 +40,7 @@ for tc in tc_list:
         print('ERROR:'+ command)
 
 for tn in tn_list:
-    command = 'python3 generate_results.py --fname othellon -k12 -pf -a1 -rm -tn:'+str(tn)
+    command = 'python3 generate_results.py --fname othello -k12 -pf -a1 -rm -tn:'+str(tn)
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     process.wait()
 
