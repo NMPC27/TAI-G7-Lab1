@@ -88,7 +88,7 @@ Time Taken: 2m30,314s
 
 ### `cpm_gen`
 
-Best run
+Exam
 ```
 ./bin/cpm_gen -s 'As the' -f ./example/othello.txt -n 1000 
 ```

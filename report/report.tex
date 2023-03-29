@@ -7,11 +7,8 @@
 \usepackage{hyperref}
 \usepackage{listings}
 
-% TODO: evaluate entropy for the generated text!!!
-% TODO: alpha difference when it is below 0?
 % TODO: the lesser the K, the more time the MostCommonPrediction manager takes
-% TODO: final conclusion: we didn't take into account *when* we should start copying, since we copy as soon we can
-% TODO: due to time constraints, the thresholds were not evaluated in conjunction
+% TODO: (DONE - verificar nas conclusoes) final conclusion: we didn't take into account *when* we should start copying, since we copy as soon we can
 
 \begin{document}
 
@@ -42,10 +39,10 @@ The text generator receives a text as input to train the model, and then follows
 but instead of predicting the next symbol, it uses the probability distribution to generate a random symbol based on these probabilities.
 
 In this report we will first present how the work was organized, in the \ref{sec:work-organization} section.
-Then, we will present the \ref{sec:copy-model}, how we implemented it and the results obtained, which we will compare by calculating the entropy of different text examples,
+Then, we will present the copy model in \ref{sec:copy-model}, how we implemented it and the results obtained, which we will compare by calculating the entropy of different text examples,
 like \verb|chry.txt| given by the teachers, with different parameters we defined for the model.
-The next section is dedicated to the \ref{sec:text-generator}, where we will present the implementation and the results obtained for the text generator,
-using different texts as input for training of the generator, as well as diferrent starting points for the generation of text.
+The next section is \ref{sec:text-generator}, dedicated to the text generator, where we will present the implementation and the results obtained,
+using different texts as input for training of the generator, as well as different starting points for the generation of text.
 Finally, we will conclude the report in the \ref{sec:conclusion} section.
 
 \section{Work organization}
@@ -64,7 +61,7 @@ For the text generator all the code is in the \verb|cpm_gen.cpp| file, due to it
 \label{sec:copy-model}
 
 The copy model behaves in a straightforward way.
-At each symbol in the file, the program verifies if the pattern of $k$ symbols with the current symbol being the last has already occurred in the past.
+At each symbol in the file, the program verifies if the pattern of $k$ symbols, with the current symbol being the last, has already occurred in the past.
 That is, at position $x_n$, the pattern within positions $x_{n-k+1}$ and $x_n$ is evaluated to see if it appeared in the past.
 
 To do that, each of these $k$-sized patterns at every position is saved in a hash table built incrementally while the file is being processed.
@@ -77,7 +74,7 @@ In these cases, the reported probabilities follow a fixed default distribution t
 When predictions can be made, a strategy is followed to choose the appropriate pointer for the current pattern.
 After a pointer is chosen, it is fixed and predictions are made sequentially from that point on.
 That is, if at position $x_n$ we have the copy pointer $x_m$, then we will predict the character at $x_{n+1}$ to be equal to the character at $x_{m+1}$, the character at $x_{n+2}$ to be equal to the character at $x_{m+2}$, and so on.
-The predictions aren't completely certain; we assume a probability of making a correct prediction, which varies depending on how well the prediction going.
+The predictions aren't completely certain; we assume a probability of making a correct prediction, which varies depending on how well the prediction is going.
 
 This process is repeated until a threshold is met, which is based on the probability of making a correct prediction at the current position.
 When the threshold is met, we stop predicting, and keep evaluating the file's content as normal.
@@ -106,28 +103,10 @@ The files chosen for testing are present in the repository\footnote{\url{https:/
 
 Throughout this section, the different program parameters are detailed, and their effect on the model's performance, both in terms of execution time and quality of the results, is studied.
 To analyze the effect of a parameter $l$, the copy model is run with different values for $l$ while keeping all other parameters with the default values.
-Firstly, the final entropy and execution time is shown overall in section \ref{sec:copy-model-results}.
-In the following sections, each parameter is described, and their effects on the model performance are studied.
 
 For the results regarding the information content of the symbols throughout the \verb|chry.txt| and \verb|othello.txt| files, the data was transformed with a low-pass filter using a moving average with window size of 10000 and 100 samples respectively, since the data exhibited a very large frequency.
 Additionally, the file \verb|othello.txt| was altered to not include newlines or commas, which were respectively replaced by spaces and semicolons.
 These were complicating posterior data analysis due to how the model's results are saved to disk, which use the verbose machine mode described in section \ref{sec:copy-model-verbose}.
-
-\subsection{Overall results}
-\label{sec:copy-model-results}
-
-% TODO: adicionar resto do info à tabela abaixo e adicionar tabela para o othello
-
-\begin{table}
-    \begin{center}
-        \begin{tabular}{c|c|c|c|c|c|c}
-            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
-            \csvreader[no head]{../scripts/all_res_chry.csv}{}
-            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
-        \end{tabular}
-    \end{center}
-    \caption{\label{tab:results} Entropy and execution time for every configuration.}
-\end{table}
 
 \subsection{Pattern size}
 
@@ -249,11 +228,39 @@ For file \verb|othello.txt|, the results are in figure \ref{fig:results-pattern-
     \label{fig:results-pattern-size-other}
 \end{figure}
 
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_chry_k.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-k} Entropy and execution time when varying $k$, on ``chry.txt''.}
+\end{table}
 
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_othello_k.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-k-other} Entropy and execution time when varying $k$, on ``othello.txt''.}
+\end{table}
 
-\dots
+From the results obtained we can observe that the instant information of the current symbol has smaller variations when the pattern size is smaller, which is specially noticeable in the \verb|chry.txt| file when $k = 5$, and has bigger variations when the pattern size is larger.
+
+Other than these variations, the graphs are rather similar in behaviour, specially the big decrease in entropy at the beggining of each run for both files.
+
+Another difference between different $k$ values is the execution time, which is shown in tables \ref{tab:results-k} and \ref{tab:results-k-other}.
+By decreasing the pattern size, the execution time generally increases, which is expected since the number of ocurrences of each pattern increases making the values of our hash table, the arrays of pointers, much bigger in size.
+This is due to the fact that the copy pointer repositioning strategy used, \textbf{most common prediction} detailed in section \ref{sec:copy-model-reposition}, is has linear time complexity.
+With slightly bigger values of $k$ the execution time is smaller, and for these values the entropy results are also better, if only very slightly.
 
 \subsection{Smoothing parameter alpha}
+\label{sec:copy-model-alpha}
 
 At each coding step, the probability of correctly predicting the current character is given by the formula:
 
@@ -394,6 +401,34 @@ Another observation for \verb|chry.txt| is that, as $\alpha$ increases, the entr
 One possible interpretation is that in this part of the file the model was more able to perform correct predictions, which resulted in more pronounced misses, as exhibited by the larger information spikes towards the end.
 As such, the prediction fails would report lesser information content with larger $\alpha$, which helped the model capitalize on the correct predictions better in this specific case.
 
+Tables \ref{tab:results-alpha} and \ref{tab:results-alpha-other} show the reported entropies and execution times when varying alpha for both files.
+It can be seen that the value of $\alpha$ has to be chosen carefully, as both large and small values can compromise entropy, and so it's a parameter that should follow careful adjustments for better results.
+In terms of execution time, we can note that since $\alpha$ can heavily influence the reported prediction probabilities, and therefore trigger the pointer reposition thresholds at different times, the execution time can vary wildly depending on how well the predictions go through the file, since the program behavior is different depending on the prediction performance.
+
+For instance, if the pointer has to be repositioned when using the \textbf{most common prediction} reposition strategy, which is described in section \ref{sec:copy-model-reposition}, then a relatively expensive algorithm has to be run, and so if predictions are constantly failing it's expected that the execution time worsens.
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_chry_alpha.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-alpha} Entropy and execution time when varying $\alpha$, on ``chry.txt''.}
+\end{table}
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_othello_alpha.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-alpha-other} Entropy and execution time when varying $\alpha$, on ``othello.txt''.}
+\end{table}
+
 \subsection{Base probability distribution}
 
 For each symbol in the file, a probability distribution has to be generated according to the prediction probability.
@@ -479,10 +514,38 @@ One unexplained detail, however, is how for the run using the frequency distribu
 
 As such, the previously mentioned possibility that the frequency distribution may also hurt model performance was not found in these results.
 
+Tables \ref{tab:results-distribution} and \ref{tab:results-distribution-other} present the reported entropies and execution times.
+For both files, the uniform distribution provided worse values, which follows what was expected.
+However, for \verb|chry.txt|, using the frequency distribution took noticeably longer, when such a difference wasn't noticed for \verb|othello.txt|.
+We believe this is due to to a timing inconsistency, since the distribution is generated only once after the copy model's first pass, and is simply reused from that point on, involving no other complex operations.
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_chry_p.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-distribution} Entropy and execution time when varying the base distribution, on ``chry.txt''.}
+\end{table}
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_othello_p.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-distribution-other} Entropy and execution time when varying the base distribution, on ``othello.txt''.}
+\end{table}
+
 \subsection{Copy pointer repositioning strategy}
+\label{sec:copy-model-reposition}
 
 Different strategies can be followed when choosing a copy pointer from which to start copying.
-We developed 4 approaches, 2 of which being fairly simplistic:
+We developed 4 approaches, with the first 2 being fairly simplistic:
 \begin{itemize}
     \item \textbf{Oldest pointer first}: the chosen copy pointer is the oldest possible. If the current copy pointer is repositioned because the threshold was met, then that pointer will be completely discarded and the next oldest pointer is used.
     This is the most simple approach, which assumes similar patterns are very far in the file;
@@ -605,7 +668,35 @@ These results are for the \verb|chry.txt| file only, since for \verb|othello.txt
 
 When the array size is 10, in figure \ref{fig:results-reposition-c-10}, the symbol information is consistently high at around $0.75\times10^7$ steps, with no good predictions, which was not verified for the other modes.
 Other than that, the good copy that was previously seen at around $1.6\times10^7$ can be verified for the modes with array size 10 and 100, but more inconsistent correct prediction values are seen for array size 1000.
-Overall, 
+Overall, the BMCP strategy didn't exhibit considerable gains over the reported entropy.
+
+The considerable benefit of the BMCP strategy comes instead in terms of execution time.
+Tables \ref{tab:results-reposition} and \ref{tab:results-reposition-other} show the entropy and execution time of running on all modes for both files.
+For the same reported entropy values, BMCP is considerably faster than the base \textbf{most common prediction} strategy on \verb|chry.txt|.
+On the other hand, differences can't be noticed for \verb|othello.txt|, since the pattern size $k$ is too large considering the large alphabet size and low amount of characters in the file.
+This makes the bounding of the pointer array much less impactful, due to the fact that seeing a given $k$mer again is less probable as there are much more possible permutations of $k$-sized patterns (even though it's limited since it's english text).
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_chry_r.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-reposition} Entropy and execution time when varying the pointer reposition strategy, on ``chry.txt''.}
+\end{table}
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_othello_r.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-reposition-other} Entropy and execution time when varying the pointer reposition strategy, on ``chry.txt''.}
+\end{table}
 
 \subsection{Copy pointer reposition threshold}
 
@@ -629,7 +720,190 @@ These thresholds can also be combined together, indicating whether the pointer s
 The results were initially evaluated for each strategy in isolation.
 The combinations of thresholds were not tested due to time constraints.
 
-\dots
+Figures \ref{fig:results-threshold} and \ref{fig:results-threshold-other} show the results for the symbol information and entropy throughout both files when varying the thresholds.
+
+Regaring \verb|chry.txt|, the threshold on successive fails didn't show significant differences among each other when varying the number of fails.
+For the threshold on static probability, as the probability threshold lowers the predictions get weaker, which suggests the model is sticking too long with a bad copy pointer.
+In fact, we can notice on the last 3 spikes of figure \ref{fig:results-threshold-n-0.3} that the symbol information stays above 2 bits for a considerable amount of steps, suggesting the copy pointer should have been repositioned much earlier as the predictions are failing too much.
+The threshold based on the rate of change presented the odd behavior that was verified in section \ref{sec:copy-model-alpha} when $\alpha < 1.0$.
+Additionally, as the value of this threshold increased, the reported entropy in the middle of the file's content considerably worsens.
+
+For the file \verb|othello.txt|, however, there were no noticeable differences between threshold strategies.
+
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:3,].png}
+        \end{center}
+        \caption{Number of successive fails above 3 for chry.txt.}
+        \label{fig:results-threshold-f-3}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{Number of successive fails above 6 for chry.txt.}
+        \label{fig:results-threshold-f-6}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[f:9,].png}
+        \end{center}
+        \caption{Number of successive fails above 9 for chry.txt.}
+        \label{fig:results-threshold-f-9}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[n:0.3,].png}
+        \end{center}
+        \caption{Static probability below 0.3 for chry.txt.}
+        \label{fig:results-threshold-n-0.3}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[n:0.4,].png}
+        \end{center}
+        \caption{Static probability below 0.4 for chry.txt.}
+        \label{fig:results-threshold-n-0.4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[n:0.5,].png}
+        \end{center}
+        \caption{Static probability below 0.5 for chry.txt.}
+        \label{fig:results-threshold-n-0.5}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[c:0.01,].png}
+        \end{center}
+        \caption{Absolute value of the negative derivative of the prediction probability above 0.01 for chry.txt.}
+        \label{fig:results-threshold-c-0.01}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[c:0.05,].png}
+        \end{center}
+        \caption{Absolute value of the negative derivative of the prediction probability above 0.05 for chry.txt.}
+        \label{fig:results-threshold-c-0.05}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/chry_12_1.0_f_m_[c:0.1,].png}
+        \end{center}
+        \caption{Absolute value of the negative derivative of the prediction probability above 0.1 for chry.txt.}
+        \label{fig:results-threshold-c-0.1}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy on ``chry.txt''.}
+    \label{fig:results-threshold}
+\end{figure}
+
+\begin{figure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[f:3,].png}
+        \end{center}
+        \caption{Number of successive fails above 3 for othello.txt.}
+        \label{fig:othello-results-threshold-f-3}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[f:6,].png}
+        \end{center}
+        \caption{Number of successive fails above 6 for othello.txt.}
+        \label{fig:othello-results-threshold-f-6}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[f:9,].png}
+        \end{center}
+        \caption{Number of successive fails above 9 for othello.txt.}
+        \label{fig:othello-results-threshold-f-9}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[n:0.3,].png}
+        \end{center}
+        \caption{Static probability below 0.3 for othello.txt.}
+        \label{fig:othello-results-threshold-n-0.3}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[n:0.4,].png}
+        \end{center}
+        \caption{Static probability below 0.4 for othello.txt.}
+        \label{fig:othello-results-threshold-n-0.4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[n:0.5,].png}
+        \end{center}
+        \caption{Static probability below 0.5 for othello.txt.}
+        \label{fig:othello-results-threshold-n-0.5}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[c:0.01,].png}
+        \end{center}
+        \caption{Absolute value of the negative derivative of the prediction probability above 0.01 for othello.txt.}
+        \label{fig:othello-results-threshold-c-0.01}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[c:0.05,].png}
+        \end{center}
+        \caption{Absolute value of the negative derivative of the prediction probability above 0.05 for othello.txt.}
+        \label{fig:othello-results-threshold-c-0.05}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \begin{center}
+            \includegraphics[width=1.0\linewidth]{../scripts/images/othello_12_1.0_f_m_[c:0.1,].png}
+        \end{center}
+        \caption{Absolute value of the negative derivative of the prediction probability above 0.1 for othello.txt.}
+        \label{fig:othello-results-threshold-c-0.1}
+    \end{subfigure}
+    \caption{Information of the current symbol and entropy as the file is processed, varying the pointer reposition strategy on ``chry.txt''.}
+    \label{fig:results-threshold-other}
+\end{figure}
+
+Tables \ref{tab:results-threshold} and \ref{tab:results-threshold-other} show the entropy and execution time of running with different thresholds for both files.
+For \verb|chry.txt|, the threshold on the number of successive fails presented the best entropy values, while for \verb|othello.txt| it was the static probability.
+In terms of execution time, there was a considerable difference on \verb|chry.txt| for the different values of the static probability threshold, with higher values exhibiting a larger execution time.
+This is understandable, again, due to the linear time complexity of the pointer repositioning strategy used, and since this threshold is harsher the higher its value, more copy pointer repositionings are bound to happen, which will increase the execution time.
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_chry_t.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-threshold} Entropy and execution time when varying the threshold, on ``chry.txt''.}
+\end{table}
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{c|c|c|c|c|c|c}
+            \bfseries $k$ & \bfseries $\alpha$ & \bfseries Dist. & \bfseries Manager & \bfseries Thr. & \bfseries Entropy & \bfseries Exec. time (s) 
+            \csvreader[no head]{../scripts/tables/all_res_othello_t.csv}{}
+            {\\\hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi & \csvcolvii}
+        \end{tabular}
+    \end{center}
+    \caption{\label{tab:results-threshold-other} Entropy and execution time when varying the threshold, on ``chry.txt''.}
+\end{table}
 
 \subsection{Verbose output}
 \label{sec:copy-model-verbose}
@@ -661,24 +935,27 @@ The second parameter is to allow all lowercase characters to be generated, this 
 \subsection{Results}
 
 To better understand the Generator module and how different initial strings, which is our K and the parameters influence
-text generation, the Generator module was trained with "othello.txt" which is a very large text, varying the initial string and the parameters, but
+text generation, the Generator module was trained with \verb|"othello_original.txt"| which is a very large text, varying the initial string and the parameters, but
 maintaining the seed value of 123, with an output limit size of 10 000 characters.
-All the generated texts can be seen below
+
+All the generated texts can be seen below.
+
 
 Results for the text generator without -l or -t parameters:
 
 \hfill
 
-Listing 1: Generator output for train file "othello.txt" with initial string "T" and without -l or -t parameters
+Listing 1: Generator output for train file \verb|"othello_original.txt"| with initial string "T" and without -l or -t parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-An atim Lobewast t ile: Ohincishy'diseapon'treanne s b'tcrod (mes howintene Wim
+An atim Lobewast t ile: Ohincishy'diseapon'treanne s 
+b'tcrod (mes howintene Wim
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 2: Generator output for train file "othello.txt" with initial string "Th" and without -l or -t parameters
+Listing 2: Generator output for train file \verb|"othello_original.txt"| with initial string "Th" and without -l or -t parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -687,7 +964,7 @@ I lour laight, lou sle orts soper shenle,
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 3: Generator output for train file "othello.txt" with initial string "The" and without -l or -t parameters
+Listing 3: Generator output for train file \verb|"othello_original.txt"| with initial string "The" and without -l or -t parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -696,7 +973,7 @@ She the despeake ship my
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 4: Generator output for train file "othello.txt" with initial string "The " and without -l or -t parameters
+Listing 4: Generator output for train file \verb|"othello_original.txt"| with initial string "The " and without -l or -t parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -705,7 +982,7 @@ The Token Wensday most the Moone you know:
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 5: Generator output for train file "othello.txt" with initial string "The t" and without -l or -t parameters
+Listing 5: Generator output for train file \verb|"othello_original.txt"| with initial string "The t" and without -l or -t parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -714,29 +991,31 @@ Enter Iago? Othe. What common his deluding her fantasie,
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 6: Generator output for train file "othello.txt" with initial string "The te" and without -l or -t parameters
+Listing 6: Generator output for train file \verb|"othello_original.txt"| with initial string "The te" and without -l or -t parameters
 \\Num guesses: 590
 
 \begin{lstlisting}
 ----------------------------------------------------------
 For if such tricke vpon the error of this
 
-fo' ofalMahetse n hrtuifo ie oeigmn   odeas' ) mHoe i i, 'lIt reodese:.se
+fo' ofalMahetse n hrtuifo ie oeigmn   odeas' ) mHoe i i, 
+'lIt reodese:.se
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and without -l or -t parameters
+Listing 7: Generator output for train file \verb|"othello_original.txt"| with initial string "The tes" and without -l or -t parameters
 \\Num guesses: 2 604
 
 \begin{lstlisting}
 ----------------------------------------------------------
 all these Men, they do not, I do beseech you,
 
-fo' ofalMahetse n hrtuifo ie oeigmn   odeas' ) mHoe i i, 'lIt reodese:.se
+fo' ofalMahetse n hrtuifo ie oeigmn   odeas' ) mHoe i i, 
+'lIt reodese:.se
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 8: Generator output for train file "othello.txt" with initial string "The test" and without -l or -t parameters
+Listing 8: Generator output for train file \verb|"othello_original.txt"| with initial string "The test" and without -l or -t parameters
 \\Num guesses: 10 000
 
 \begin{lstlisting}
@@ -752,16 +1031,17 @@ Results for the text generator with -l parameter:
 
 \hfill
 
-Listing 1: Generator output for train file "othello.txt" with initial string "T" and with -l parameter
+Listing 1: Generator output for train file \verb|"othello_original.txt"| with initial string "T" and with -l parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-win sss'd yousd   kecer hete, abeeaurugotieuthe y gr wine anem
+win sss'd yousd   kecer hete, abeeaurugotieuthe y gr wine 
+anem
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 2: Generator output for train file "othello.txt" with initial string "Th" and with -l parameter
+Listing 2: Generator output for train file \verb|"othello_original.txt"| with initial string "Th" and with -l parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -770,7 +1050,7 @@ thery prod sh me growelfe ore toponio.
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 3: Generator output for train file "othello.txt" with initial string "The" and with -l parameter
+Listing 3: Generator output for train file \verb|"othello_original.txt"| with initial string "The" and with -l parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -779,26 +1059,28 @@ iago. and or pray yon. well'd be his drunke motifie sea
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 4: Generator output for train file "othello.txt" with initial string "The " and with -l parameter
+Listing 4: Generator output for train file \verb|"othello_original.txt"| with initial string "The " and with -l parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-you commited, and questie too hard wise: follow high. (prythee: an of a guilty th' confus'd,
+you commited, and questie too hard wise: follow high. 
+(prythee: an of a guilty th' confus'd,
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 5: Generator output for train file "othello.txt" with initial string "The t" and with -l parameter
+Listing 5: Generator output for train file \verb|"othello_original.txt"| with initial string "The t" and with -l parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-cassio. aunciant, be abus'd: exclaimed. are about me filles vs a most graue.
+cassio. aunciant, be abus'd: exclaimed. are about me 
+filles vs a most graue.
  she speake heauen forget moe tapers.
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 6: Generator output for train file "othello.txt" with initial string "The te" and with -l parameter
+Listing 6: Generator output for train file \verb|"othello_original.txt"| with initial string "The te" and with -l parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -807,23 +1089,25 @@ and made of the bride, and easie taskes.
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and with -l parameter
+Listing 7: Generator output for train file \verb|"othello_original.txt"| with initial string "The tes" and with -l parameter
 \\Num guesses: 2 191
 
 \begin{lstlisting}
 ----------------------------------------------------------
 make it a darling, like death, and her husband?
 
-hr' ohdnadietse n istulho lh oelhnn   oeebt' ) naog i i, 'mat reoehsg:.sg
+hr' ohdnadietse n istulho lh oelhnn   oeebt' ) naog i i, 
+'mat reoehsg:.sg
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 8: Generator output for train file "othello.txt" with initial string "The test" and with -l parameter
+Listing 8: Generator output for train file \verb|"othello_original.txt"| with initial string "The test" and with -l parameter
 \\Num guesses: 10 000
 
 \begin{lstlisting}
 ----------------------------------------------------------
-wi:  esmlen,ntd,  bri , so. eo e,alerc armeeiohitsdcslbo,isodt g ittus lhitw eh are eori.h he?
+wi:  esmlen,ntd,  bri , so. eo e,alerc armeeiohitsdcslbo,
+isodt g ittus lhitw eh are eori.h he?
 ----------------------------------------------------------
 \end{lstlisting}
 
@@ -834,16 +1118,17 @@ Results for the text generator with -t parameter:
 
 \hfill
 
-Listing 1: Generator output for train file "othello.txt" with initial string "T" and with -t parameter
+Listing 1: Generator output for train file \verb|"othello_original.txt"| with initial string "T" and with -t parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-Geee mey atoountineenet: Hat he Tuengo. Cat agagngile onifouph m y te, werellas te
+Geee mey atoountineenet: Hat he Tuengo. Cat agagngile 
+onifouph m y te, werellas te
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 2: Generator output for train file "othello.txt" with initial string "Th" and with -t parameter
+Listing 2: Generator output for train file \verb|"othello_original.txt"| with initial string "Th" and with -t parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -852,36 +1137,39 @@ Othe nand he sh your Lore Beat inke dere onclonge cozent,
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 3: Generator output for train file "othello.txt" with initial string "The" and with -t parameter
+Listing 3: Generator output for train file \verb|"othello_original.txt"| with initial string "The" and with -t parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-For lood my liue dingry. Thou haue State such my how I am do aboue lip:
+For lood my liue dingry. Thou haue State such my how I am 
+do aboue lip:
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 4: Generator output for train file "othello.txt" with initial string "The " and with -t parameter
+Listing 4: Generator output for train file \verb|"othello_original.txt"| with initial string "The " and with -t parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-When haue was high. Haue you; a which, and adie: and sold not man haue that forcement 
+When haue was high. Haue you; a which, and adie: and sold 
+not man haue that forcement 
 that is euill she heere enemy in
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 5: Generator output for train file "othello.txt" with initial string "The t" and with -t parameter
+Listing 5: Generator output for train file \verb|"othello_original.txt"| with initial string "The t" and with -t parameter
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
 When haue was high. Haue you; a which, and adie:
- and sold not man haue that forcement that is euill she heere enemy in
+ and sold not man haue that forcement that is euill she 
+ heere enemy in
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 6: Generator output for train file "othello.txt" with initial string "The te" and with -t parameter
+Listing 6: Generator output for train file \verb|"othello_original.txt"| with initial string "The te" and with -t parameter
 \\Num guesses: 319
 
 \begin{lstlisting}
@@ -892,7 +1180,7 @@ dvdr bo'WliuaoS o( toy iyol  l dai Cdri  inc snuhmto h
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and with -t parameter
+Listing 7: Generator output for train file \verb|"othello_original.txt"| with initial string "The tes" and with -t parameter
 \\Num guesses: 7 548
 
 \begin{lstlisting}
@@ -903,7 +1191,7 @@ to  oe aa rhFa   ed v.otg n?- aes uu
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 8: Generator output for train file "othello.txt" with initial string "The test" and with -t parameter
+Listing 8: Generator output for train file \verb|"othello_original.txt"| with initial string "The test" and with -t parameter
 \\Num guesses: 10 000
 
 \begin{lstlisting}
@@ -918,16 +1206,17 @@ Results for the text generator with -t and -l parameters:
 
 \hfill
 
-Listing 1: Generator output for train file "othello.txt" with initial string "T" and with -t and -l parameters
+Listing 1: Generator output for train file \verb|"othello_original.txt"| with initial string "T" and with -t and -l parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-bandont ftey wewhellllazoou t bero t t mince iseerododof  anke cor
+bandont ftey wewhellllazoou t bero t t mince iseerododof  
+anke cor
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 2: Generator output for train file "othello.txt" with initial string "Th" and with -t and -l parameters
+Listing 2: Generator output for train file \verb|"othello_original.txt"| with initial string "Th" and with -t and -l parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -936,7 +1225,7 @@ theerem be wit dood, why me my bassinesdeme
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 3: Generator output for train file "othello.txt" with initial string "The" and with -t and -l parameters
+Listing 3: Generator output for train file \verb|"othello_original.txt"| with initial string "The" and with -t and -l parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
@@ -945,66 +1234,100 @@ iago. not isleepe to madeliuillainstrankes
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 4: Generator output for train file "othello.txt" with initial string "The " and with -t and -l parameters
+Listing 4: Generator output for train file \verb|"othello_original.txt"| with initial string "The " and with -t and -l parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-return'd againe to her grant the way. set it, and my sould he diuell.
+return'd againe to her grant the way. set it, and my sould 
+he diuell.
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 5: Generator output for train file "othello.txt" with initial string "The t" and with -t and -l parameters
+Listing 5: Generator output for train file \verb|"othello_original.txt"| with initial string "The t" and with -t and -l parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-at blood beene me by and her officer iago. you shall my husband
+at blood beene me by and her officer iago. you shall my 
+husband
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 6: Generator output for train file "othello.txt" with initial string "The te" and with -t and -l parameters
+Listing 6: Generator output for train file \verb|"othello_original.txt"| with initial string "The te" and with -t and -l parameters
 \\Num guesses: 0
 
 \begin{lstlisting}
 ----------------------------------------------------------
-steep'd, to enflame it be true: or foredoes me without more the strongly to you:
+steep'd, to enflame it be true: or foredoes me without 
+more the strongly to you:
  for by this is othello, desdemon?
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 7: Generator output for train file "othello.txt" with initial string "The tes" and with -t and -l parameters
+Listing 7: Generator output for train file \verb|"othello_original.txt"| with initial string "The tes" and with -t and -l parameters
 \\Num guesses: 7 349
 
 \begin{lstlisting}
 ----------------------------------------------------------
-e ,ulyirn et ai telott,tmnhel  n uoa  oor ydo   mofe   de.bowsaege ntdhoee 
+e ,ulyirn et ai telott,tmnhel  n uoa  oor ydo   mofe   
+de.bowsaege ntdhoee 
 ----------------------------------------------------------
 \end{lstlisting}
 
-Listing 8: Generator output for train file "othello.txt" with initial string "The test" and with -t and -l parameters
+Listing 8: Generator output for train file \verb|"othello_original.txt"| with initial string "The test" and with -t and -l parameters
 \\Num guesses: 10 000
 
 \begin{lstlisting}
 ----------------------------------------------------------
-easerh w : p ht tn-lyerlehm eos shn snsn ovssniro h  fanmdi'l
+easerh w : p ht tn-lyerlehm eos shn snsn ovssniro h  
+fanmdi'l
 ----------------------------------------------------------
 \end{lstlisting}
+
+To conclude, a small test to compare the entropy of the original file and the entropy of the generated file was done.
+The test was done by running the copy model on the \verb|"othello_original.txt"| file to obtain the entropy. The following listing displays the result.
+
+\begin{lstlisting}
+----------------------------------------------------------
+Mean amount of information of a symbol: 4.60154 bits
+Total amount of information: 715958 bits
+----------------------------------------------------------
+\end{lstlisting}
+
+Then a generated text was produced using the seed $123$ and a initial string of $the$.
+With the generated text, we ran the copy model again to obtain the entropy of the generated text.
+The following listing displays the result.
+
+\begin{lstlisting}
+----------------------------------------------------------
+Mean amount of information of a symbol: 4.63313 bits
+Total amount of information: 677697 bits
+----------------------------------------------------------
+\end{lstlisting}
+
+By comparing these results we can conclude that the entropy of the generated text is smaller than the entropy of the original text,
+as expected, because the generated text should never produce more information than the original text.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-% TODO VERIFICAR ESTA INTRO
 From the development of this project, it was possible to conclude that the Copy
-Model is a successful and effective model to store occurrences of events after certain contexts
-and to allow the calculation of probabilities of these events happening. In turn, this allows
-the generation of new text based on training examples and on the information that the
-model provides.
+Model, although it did produce smaller entropy than the entropy contained in the original files,
+it didn't demonstrate the desireable performance, even when testing various strategies and combinations.
+On the other hand, the generation of new text based on training examples did produce good results depending on the parameters used.
 
 \subsection{Copy Model}
 
-\subsection{CPM Gen}
+Even though the copy model reported lower entropy values for the \verb|chry.txt| file, the same was not verified for \verb|othello.txt|.
+We believe this is due to the greater complexity of the alphabet on \verb|othello.txt|, which is unmetched with how small the number of characters is when compared with \verb|chry.txt|.
+Even then, the entropy value is only slightly better than the baseline for \verb|chry.txt|.
+Overall, by analyzing the graphs, we can note that the model can't perform long-standing predictions.
 
+This is probabily due to a factor we didn't take into account when developing the model: we have no strategy to decide the moment when we should start copying, since we copy as soon we can.
+This can have a great impact on the results, since the sequence we are copying may not the best one at a given time, and since we attempt predictions with a given copy pointer we miss the chance of trying another that may have provided a more successful copy.
+
+\subsection{Text generator}
 
 By looking at the results we can conclude that the initial string, which is our K, is the parameter that influences our results the most.
 This happens because a very small K generates words that don't make sense, and a very large K will reduce the amount of entries 
@@ -1022,7 +1345,7 @@ The -t parameter allows the generator to train itself, and it lowers the number 
 and then it will make the same error again. This parameter is better for larger input texts, because it will have more entries in the Hash Table,
 and therefore decreasing the number of guesses and increasing the accuracy of the probabilities.
 
-Using the double parameters it behaves similarly to the -t parameter, but it will have less guesses and have a slightly better accuracy at generating text that makes sense.
+Using the double parameters it behaves similarly to the -t parameter, but it will generate less guesses and have a slightly better accuracy at generating text that makes sense.
 Although this small increase in accuracy is only noticeable in our results in the "The te" and "The tes" initial strings.
 This makes it a better option than the -t option alone but it compromises the quality of the text generated due to being only lower case letters.
 
