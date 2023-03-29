@@ -44,6 +44,15 @@ Finally, we will conclude the report in the \ref{sec:conclusion} section.
 \section{Work organization}
 \label{sec:work-organization}
 
+To organize the work we decide to use a object oriented approach, this way it was easier to implement different parameters to test the copy model and the text generator.
+
+First for the copy model we created a file named \verb|main.cpp|, where we instantiate the object \verb|CopyModel|, which is the class that implements the copy model.
+The \verb|CopyModel| class has a constructor that receives the parameters that we want to test, and with these parameters we can instantiate different objects of certain classes, and test them with different files.
+The more important classes are the abstract classes: \verb|CopyPointerManager|, \verb|CopyPointerThreshold| and \verb|BaseDistribution|. By using these base classes we could implement different strategies for the copy model, by creating child classes of these base classes, and then instantiate the \verb|CopyModel| object with the child classes as parameters.
+This proved to be a very useful approach, since we could test different strategies for the copy model, and compare the results obtained to see which strategy, or combination of strategy/parameters, was the best.
+
+For the text generator all the code is in the \verb|cpm_gen.cpp| file, due to its more simple structure. The generator also implements some parameters and uses a similar strategy of reading patterns as the copy model.
+
 \section{Copy model}
 \label{sec:copy-model}
 
