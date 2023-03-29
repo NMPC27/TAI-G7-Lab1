@@ -1,5 +1,13 @@
 # TAI-G7-Lab1
 
+## Repository structure
+
+- `src`: source code of both `cpm` and `cpm_gen`
+- `bin`: compiled binaries of `cpm` and `cpm_gen`
+- `example`: test files to run the `cpm` and `cpm_gen` with
+- `report`: report detailing the developed model and the decisions taken during development
+- `scripts`: helper data analysis Python3 scripts
+
 ## Requirements
 CMake >= 3.10
 
